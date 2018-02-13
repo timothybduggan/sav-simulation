@@ -4,10 +4,10 @@ import java.util.Random;
 public class TripGeneration {
 	// This should take care of the 7 steps (bottom of page 3)
 	// Will look at current time, and 'demand' model
-	private double outerServiceGenerationRate;
-	private double outerCoreGenerationRate;
-	private double innerCoreGenerationRate;
-	private double alpha;
+	private double outerServiceGenerationRate;	// ~9  trips / zone / day -- Chance of generating a trip = 9/288 trips / zone / step. Use this for P(trip generated) in outer core?
+	private double outerCoreGenerationRate;		// ~27 trips / zone / day -- 27/288
+	private double innerCoreGenerationRate;		// ~30 trips / zone / day -- 30/288
+	private double alpha;	// before noon, alpha = 1. Afternoon, alpha = .77
 	
 	public TripGeneration(float osgr, float ocgr, float icgr, float alpha) {
 		this.outerServiceGenerationRate = osgr;
@@ -68,9 +68,11 @@ public class TripGeneration {
 	private Point chooseDestination(Point start, boolean goEast, boolean goNorth, int distance) {
 		double probDestination = 1.0 / (distance + 1); // each destination has an even chance of being selected.
 		Random generator = new Random();
-		
-		int selection = (int) Math.ceil(generator.nextDouble() / probDestination);
-		System.out.println(selection+"\t\t"+probDestination);
+		int selection = 1;
+		for (int i = 0; i < 100; i++) {
+			selection = (int) Math.ceil(generator.nextDouble() / probDestination);
+			System.out.println(selection+"\t\t"+probDestination);
+		}
 		int distanceNorth = distance - (selection - 1);
 		if (!goNorth) {	// if we aren't going north, we should go south.
 			distanceNorth *= -1;// (going south is going in the negative y)

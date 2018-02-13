@@ -56,7 +56,11 @@ public class Vehicle {
 		return onTrip;
 	}
 	
-	public void moveTowardsDestination() {
+	public void setDestination(Point destination) {
+		this.destination = destination;
+	}
+	
+	public void moveTowardsDestination(Point secondaryDestination) {
 		int maxShifts = 2*timeStep; // number of 1/4-mile blocks we can move
 		int remainingShifts = maxShifts;	// number of 1/4-mile blocks we have moved
 		if (position.x < destination.x) { // if we are west of the destination...
@@ -95,7 +99,7 @@ public class Vehicle {
 		}
 		
 		if (remainingShifts > 0) { // steps remain...
-			// we've made it early, we can start moving to next destination?
+			// we've made it early, we can start moving to secondaryDestination? (might be dumb)
 		}
 	}
 	
