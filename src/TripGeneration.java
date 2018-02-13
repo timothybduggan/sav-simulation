@@ -4,14 +4,26 @@ import java.util.Random;
 public class TripGeneration {
 	// This should take care of the 7 steps (bottom of page 3)
 	// Will look at current time, and 'demand' model
-	private float outerServiceGenerationRate;
-	private float outerCoreGenerationRate;
-	private float innerCoreGenerationRate;
-	private float alpha;
+	private double outerServiceGenerationRate;
+	private double outerCoreGenerationRate;
+	private double innerCoreGenerationRate;
+	private double alpha;
 	
+	public TripGeneration(float osgr, float ocgr, float icgr, float alpha) {
+		this.outerServiceGenerationRate = osgr;
+		this.outerCoreGenerationRate = ocgr;
+		this.innerCoreGenerationRate = icgr;
+		this.alpha = alpha;
+	}
 	
+	public TripGeneration() {
+		this.outerServiceGenerationRate = 0.2;
+		this.outerCoreGenerationRate = 0.3;
+		this.innerCoreGenerationRate = 0.5;
+		this.alpha = 0.5;
+	}
 	
-	private Point generateTrip(Point pos) {
+	public Point generateTrip(Point pos) {
 		Random generator = new Random();
 		Point destination = new Point(-1,-1);
 		
@@ -25,7 +37,9 @@ public class TripGeneration {
 					double probNorth = probabilityNorth(pos);							// 3. Sample N-S Direction
 					boolean goNorth = (generator.nextDouble() < probNorth);
 					destination = chooseDestination(pos, goEast, goNorth, distance);	// 4. Select Destination
-				
+					System.out.println("Distance: "+distance+"\tGoNorth: "+goNorth+"\tGoEast: "+goEast);
+					System.out.println("Generated destination: "+destination.toString()+" from origin: "+pos.toString());
+					
 					if (i >= 20) break;	// 6. If 20 destinations have been outside the service area, return to 1.
 				}
 		}	// This loop keeps us going until we find a valid destination.
@@ -52,9 +66,11 @@ public class TripGeneration {
 	}
 	
 	private Point chooseDestination(Point start, boolean goEast, boolean goNorth, int distance) {
-		double probDestination = 1 / (distance + 1); // each destination has an even chance of being selected.
+		double probDestination = 1.0 / (distance + 1); // each destination has an even chance of being selected.
 		Random generator = new Random();
+		
 		int selection = (int) Math.ceil(generator.nextDouble() / probDestination);
+		System.out.println(selection+"\t\t"+probDestination);
 		int distanceNorth = distance - (selection - 1);
 		if (!goNorth) {	// if we aren't going north, we should go south.
 			distanceNorth *= -1;// (going south is going in the negative y)
