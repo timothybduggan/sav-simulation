@@ -60,9 +60,10 @@ public class Vehicle {
 		this.destination = destination;
 	}
 	
-	public void moveTowardsDestination(Point secondaryDestination) {
+	public void moveTowardsDestination() {
 		int maxShifts = 2*timeStep; // number of 1/4-mile blocks we can move
 		int remainingShifts = maxShifts;	// number of 1/4-mile blocks we have moved
+		
 		if (position.x < destination.x) { // if we are west of the destination...
 			remainingShifts -= (destination.x - position.x);
 			if (remainingShifts >= 0) {
@@ -80,6 +81,7 @@ public class Vehicle {
 				position.x = position.x - maxShifts;
 			}
 		}
+		
 		if (position.y < destination.y && remainingShifts > 0) {
 			if (remainingShifts < (destination.y - position.y)) { // fewer moves than we need
 				position.y = position.y + remainingShifts;
