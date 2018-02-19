@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class TripGeneration {
@@ -8,6 +9,8 @@ public class TripGeneration {
 	private double outerCoreGenerationRate;		// ~27 trips / zone / day -- 27/288
 	private double innerCoreGenerationRate;		// ~30 trips / zone / day -- 30/288
 	private double alpha;	// before noon, alpha = 1. Afternoon, alpha = .77
+	private int height = 40;
+	private int width = 40;
 	
 	public TripGeneration(double osgr, double ocgr, double icgr, double alpha) {
 		this.outerServiceGenerationRate = osgr / 288.0;
@@ -20,11 +23,24 @@ public class TripGeneration {
 		this(9.0, 27.0, 30.0, 0.5);
 	}
 	
-	public Point generateTrip(Point pos) {
+	public double getOuterServiceGenerationRate() {
+		return this.outerServiceGenerationRate;
+	}
+	
+	public double getOuterCoreGenerationRate() {
+		return this.outerCoreGenerationRate;
+	}
+	
+	public double getInnerCoreGenerationRate() {
+		return this.innerCoreGenerationRate;
+	}
+	
+	public Trip generateTrip(Point pos) {
 		Random generator = new Random();
 		Point destination = new Point(-1,-1);
 		
 		while (!isInServiceArea(destination)) {
+			// Change this to use fig. 1
 			int distance = generator.nextInt(57)+4; // 1. Sample Trip Distance (1-15 miles / 4-60 quarter-miles) [should change based on fig. 1 (data from http://nhts.ornl.gov/2009/pub/stt.pdf)]
 			int i = 0;
 				while (!isInServiceArea(destination)) {	// 5. If Destination not in service area, return to 2.
@@ -41,12 +57,12 @@ public class TripGeneration {
 				}
 		}	// This loop keeps us going until we find a valid destination.
 		
-		return destination;
+		return new Trip(pos, destination, null);
 	}
 	
 	private double probabilityEast(Point pos) {
-		int zonesEast = 40 - pos.x;
-		int zonesWest = 40 - zonesEast - 1; 
+		int zonesEast = width - pos.x;
+		int zonesWest = width - zonesEast - 1; 
 		
 		double prob = alpha * (zonesEast) / (zonesEast + zonesWest) + (1 - alpha) * 0.5;
 		
@@ -54,8 +70,8 @@ public class TripGeneration {
 	}
 	
 	private double probabilityNorth(Point pos) {
-		int zonesNorth = 40 - pos.y;
-		int zonesSouth = 40 - zonesNorth - 1;
+		int zonesNorth = height - pos.y;
+		int zonesSouth = height - zonesNorth - 1;
 		
 		double prob = alpha * (zonesNorth) / (zonesNorth + zonesSouth) + (1 - alpha) * 0.5;
 		
@@ -86,44 +102,55 @@ public class TripGeneration {
 	
 	private boolean isInServiceArea(Point pos) {
 		if (pos.x < 1) return false;
-		if (pos.x > 40) return false;
+		if (pos.x > width) return false;
 		if (pos.y < 1) return false;
-		if (pos.y > 40) return false;
+		if (pos.y > height) return false;
 		
 		return true;
 	}
-	
-	// generates new trips based on rates (seen above)
-	public ArrayList<Trip> generateDemand() {
-		Random generator = new Random();
-		ArrayList<Trip> demand = new ArrayList<Trip>();
-		
-		for (int i = 1; i < 41; i++) {
-			for (int j = 1; j < 41; j++) {
-				Point pos = new Point(i,j);
-				double rate = 0;
-				if (isInnerCore(pos)) rate = innerCoreGenerationRate;
-				if (isOuterCore(pos)) rate = outerCoreGenerationRate;
-				if (isOuterService(pos)) rate = outerServiceGenerationRate;
+
+	public boolean isInnerCore(Point pos) {
+		// if (within 2.5 miles of center), true
+		if (pos.x > 15 && pos.x < 26) {
+			if (pos.y > 15 && pos.y < 26) {
+				return true;
 			}
 		}
-	}
-	
-	private boolean isInnerCore(Point pos) {
-		// if we are in center 2.5x2.5, we are in the inner core.
-		if ((16 <= pos.x && pos.x <= 25) && (16 <= pos.y && pos.y <= 25)) return true;
 		return false;
 	}
 	
-	private boolean isOuterCore(Point pos) {
-		// if we are in center 5x5, but not the inner core, we are in the outer core
-		if (!isInnerCore(pos) && (11 <= pos.x && pos.x <= 30) && (11 <= pos.y && pos.y <= 30)) return true; 
+	public boolean isOuterCore(Point pos) {
+		if (!isInnerCore(pos)) {
+			if (pos.x > 10 && pos.x < 31) {
+				if (pos.y > 10 && pos.y < 31) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 	
-	private boolean isOuterService(Point pos) {
-		// if we are not in the inner core, or the outer core, we are in outer service area.
-		if (!isInnerCore(pos) && !isOuterCore(pos)) return true;
+	public boolean isOuterServiceArea(Point pos) {
+		if (!isInnerCore(pos) && !isOuterCore(pos)) return true; // if we are not in the core, we are in the outer service area
 		return false;
+	}
+	
+	public ArrayList<Trip> generateTrips() {
+		ArrayList<Trip> newTrips = new ArrayList<Trip>();
+		Random generator = new Random();
+		for (int i = 1; i < width + 1; i++) {
+			for (int j = 1; j < height + 1; j++) {
+				Point start = new Point(i,j);
+				if (this.isOuterServiceArea(start)) {
+					if (generator.nextDouble() < this.outerServiceGenerationRate) newTrips.add(generateTrip(start));
+				} else if (this.isOuterCore(start)) {
+					if (generator.nextDouble() < this.outerCoreGenerationRate) newTrips.add(generateTrip(start));
+				} else {
+					if (generator.nextDouble() < this.innerCoreGenerationRate) newTrips.add(generateTrip(start));
+				}
+			}
+		}
+		
+		return newTrips;
 	}
 }
