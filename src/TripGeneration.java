@@ -9,18 +9,15 @@ public class TripGeneration {
 	private double innerCoreGenerationRate;		// ~30 trips / zone / day -- 30/288
 	private double alpha;	// before noon, alpha = 1. Afternoon, alpha = .77
 	
-	public TripGeneration(float osgr, float ocgr, float icgr, float alpha) {
-		this.outerServiceGenerationRate = osgr;
-		this.outerCoreGenerationRate = ocgr;
-		this.innerCoreGenerationRate = icgr;
+	public TripGeneration(double osgr, double ocgr, double icgr, double alpha) {
+		this.outerServiceGenerationRate = osgr / 288.0;
+		this.outerCoreGenerationRate = ocgr / 288.0;
+		this.innerCoreGenerationRate = icgr / 288.0;
 		this.alpha = alpha;
 	}
 	
 	public TripGeneration() {
-		this.outerServiceGenerationRate = 0.2;
-		this.outerCoreGenerationRate = 0.3;
-		this.innerCoreGenerationRate = 0.5;
-		this.alpha = 0.5;
+		this(9.0, 27.0, 30.0, 0.5);
 	}
 	
 	public Point generateTrip(Point pos) {
@@ -94,5 +91,39 @@ public class TripGeneration {
 		if (pos.y > 40) return false;
 		
 		return true;
+	}
+	
+	// generates new trips based on rates (seen above)
+	public ArrayList<Trip> generateDemand() {
+		Random generator = new Random();
+		ArrayList<Trip> demand = new ArrayList<Trip>();
+		
+		for (int i = 1; i < 41; i++) {
+			for (int j = 1; j < 41; j++) {
+				Point pos = new Point(i,j);
+				double rate = 0;
+				if (isInnerCore(pos)) rate = innerCoreGenerationRate;
+				if (isOuterCore(pos)) rate = outerCoreGenerationRate;
+				if (isOuterService(pos)) rate = outerServiceGenerationRate;
+			}
+		}
+	}
+	
+	private boolean isInnerCore(Point pos) {
+		// if we are in center 2.5x2.5, we are in the inner core.
+		if ((16 <= pos.x && pos.x <= 25) && (16 <= pos.y && pos.y <= 25)) return true;
+		return false;
+	}
+	
+	private boolean isOuterCore(Point pos) {
+		// if we are in center 5x5, but not the inner core, we are in the outer core
+		if (!isInnerCore(pos) && (11 <= pos.x && pos.x <= 30) && (11 <= pos.y && pos.y <= 30)) return true; 
+		return false;
+	}
+	
+	private boolean isOuterService(Point pos) {
+		// if we are not in the inner core, or the outer core, we are in outer service area.
+		if (!isInnerCore(pos) && !isOuterCore(pos)) return true;
+		return false;
 	}
 }
