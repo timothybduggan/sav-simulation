@@ -2,6 +2,7 @@ import java.awt.Point;
 
 public class Vehicle {
 	private Point position;	// current position. x = columns, y = rows (1-40);
+	private Point previousPosition; // previous position (where it was last time step)
 	private float milesDriven;	// total miles driven
 	private float unoccupiedMiles;	// miles driven without an occupant
 	private int timeSinceLastStart;	// for tracking cold starts (in num ticks)
@@ -30,6 +31,10 @@ public class Vehicle {
 	
 	public Point getPosition() {
 		return position;
+	}
+	
+	public Point getPreviousPosition() {
+		return previousPosition;
 	}
 	
 	public float getMilesDriven() {
@@ -61,6 +66,7 @@ public class Vehicle {
 	}
 	
 	public void moveTowardsDestination() {
+		this.previousPosition = (Point) this.position.clone(); // we are about to move, so our current position becomes our previous position
 		int maxShifts = 2*timeStep; // number of 1/4-mile blocks we can move
 		int remainingShifts = maxShifts;	// number of 1/4-mile blocks we have moved
 		

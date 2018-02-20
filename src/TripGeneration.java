@@ -11,16 +11,24 @@ public class TripGeneration {
 	private double alpha;	// before noon, alpha = 1. Afternoon, alpha = .77
 	private int height = 40;
 	private int width = 40;
+	//private double[][] generationRates; // instead, get this from the map.
+	private Map map;
 	
 	public TripGeneration(double osgr, double ocgr, double icgr, double alpha) {
 		this.outerServiceGenerationRate = osgr / 288.0;
 		this.outerCoreGenerationRate = ocgr / 288.0;
 		this.innerCoreGenerationRate = icgr / 288.0;
 		this.alpha = alpha;
+		this.map = new Map(null, this);
+		this.map.calculateZoneGenerationRates();
 	}
 	
 	public TripGeneration() {
 		this(9.0, 27.0, 30.0, 0.5);
+	}
+	
+	public Map getMap() {
+		return this.map;
 	}
 	
 	public double getOuterServiceGenerationRate() {
@@ -136,21 +144,16 @@ public class TripGeneration {
 	}
 	
 	public ArrayList<Trip> generateTrips() {
-		ArrayList<Trip> newTrips = new ArrayList<Trip>();
-		Random generator = new Random();
-		for (int i = 1; i < width + 1; i++) {
-			for (int j = 1; j < height + 1; j++) {
-				Point start = new Point(i,j);
-				if (this.isOuterServiceArea(start)) {
-					if (generator.nextDouble() < this.outerServiceGenerationRate) newTrips.add(generateTrip(start));
-				} else if (this.isOuterCore(start)) {
-					if (generator.nextDouble() < this.outerCoreGenerationRate) newTrips.add(generateTrip(start));
-				} else {
-					if (generator.nextDouble() < this.innerCoreGenerationRate) newTrips.add(generateTrip(start));
+		ArrayList<Trip> newTrips = new ArrayList<Trip>();	// Arraylist of trips generated this call.
+		Random generator = new Random();					// Generator for getting numbers in [0,1)
+		for (int i = 0; i < width; i++) {		// for each zone...
+			for (int j = 0; j < height; j++) {
+				if (generator.nextDouble() < map.getGenerationRate(i,j)) { 	// if we get a number < generation rate for that zone...
+					newTrips.add(this.generateTrip(new Point(i+1,j+1)));	// generate a new trip from that point!
 				}
 			}
 		}
-		
+		// return the list of new trips!
 		return newTrips;
 	}
 }
