@@ -36,7 +36,7 @@ public class Client extends Application {
 	private BorderPane window;
 	private BorderPane drawingView;
 	public static final int width = 800;
-	public static final int height = 800;
+	public static final int height = 850;
 	private MenuBar menuBar;
 	// DrawingView Instance Variables
 	private Vector<PaintObject> allPaintObjects;
@@ -70,7 +70,7 @@ public class Client extends Application {
 		
 		initializeSimulation();
 		initializeGrid();
-		updateGrid();
+		updateGridVehicles();
 		
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -79,13 +79,24 @@ public class Client extends Application {
 	// Sets up the menu at the top of the screen
 	private void setupMenus() {
 		MenuItem help = new MenuItem("Help");
+		Menu views = new Menu("Views");
+		MenuItem vc = new MenuItem("Vehicle Count");
+		MenuItem gr = new MenuItem("Generation Rates");
+		MenuItem cd = new MenuItem("Current Demand");
 		Menu options = new Menu("Options");
 		help.setOnAction(event -> {
 			Alert helpWindow = new HelpWindow();
 			helpWindow.showAndWait();
 		});
-
-		options.getItems().addAll(help);
+		vc.setOnAction(event -> {
+			updateGridVehicles();
+		});
+		gr.setOnAction(event -> {
+			updateGridGeneration();
+		});
+		
+		views.getItems().addAll(vc, gr, cd);
+		options.getItems().addAll(views, help);
 
 		menuBar = new MenuBar();
 		menuBar.getMenus().addAll(options);
@@ -104,7 +115,7 @@ public class Client extends Application {
 	// Initializes the Control Bar (for changing drawing object, color, etc)
 	
 	private void initializeSimulation() {
-		sim = new Simulation();
+		sim = new Simulation(false);
 		grid = sim.getVehicleCount();
 	}
 
@@ -118,17 +129,56 @@ public class Client extends Application {
 		drawAllPaintObjects();
 	}
 	
-	private void updateGrid() {
+	private void updateGridVehicles() {
 		int i = 0;
+		grid = sim.getVehicleCount();
+		
 		for (PaintObject po : allPaintObjects) {
 			((Tile) po).setValue(grid[i%40][i/40]);
-			System.out.println("("+i%40+","+i/40+") = "+grid[i%40][i/40]);
+//			System.out.println("("+i%40+","+i/40+") = "+grid[i%40][i/40]);
 			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(255,0,0,grid[i%40][i/40]/2.0)));
+			((Tile) po).setSideLength(20);
+			
 			i++;
 		}
 		
 		this.resetCanvas();
 		this.drawAllPaintObjects();
+	}
+	
+	private void updateGridGeneration() {
+		int i = 0;
+		
+		grid = sim.getGenerationRates();
+		
+		for (PaintObject po : allPaintObjects) {
+			((Tile) po).setValue("");
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 0, 255,grid[i%40][i/40]/105.0)));
+			((Tile) po).setSideLength(20);
+			
+			i++;
+		}
+		
+		this.resetCanvas();
+		this.drawAllPaintObjects();
+	}
+	
+	private void updateGridDemand() {
+		int i = 0;
+		
+		grid = sim.getEstimatedDemand();
+		for (PaintObject po : allPaintObjects) {
+			if (i >= 100) {
+				((Tile) po).setSideLength(0);
+				continue;
+			}
+			
+			((Tile) po).setValue(10);
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 255, 0,grid[i%10][i/10] / 25.0)));
+			((Tile) po).setSideLength(80);
+			
+			i++;
+		}
 	}
 	
 	// Draws all paint objects (in vector), including currentPaintObject

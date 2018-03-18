@@ -2,6 +2,7 @@ package tests;
 import static org.junit.Assert.*;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
 import org.junit.Test;
 
@@ -117,6 +118,7 @@ public class test {
 		assertFalse(t.isPickedUp());
 		assertFalse(t.isFinished());
 		assertFalse(t.hasAssignedSAV());
+		assertEquals(t.getCurrentPosition(), null);
 		assertEquals(t.getWaitTime(), 0, .001);
 		t.update();
 		t.assignSAV(a);
@@ -181,7 +183,83 @@ public class test {
 	}	
 
 	@Test
+	public void TripTest4() {
+		// Rush Hour Trip Tests (crosses into non-rush)
+		Vehicle a = new Vehicle(1,1);
+		Vehicle b = new Vehicle(1,1);
+		Trip t = new Trip(new Point(1,1), new Point(40,40), a);
+		assertFalse(t.assignSAV(b));
+		
+		assertEquals(t.getStartTime(), 0);
+		assertEquals(a.getPosition(), new Point(1,1));
+		t.update(90);
+		assertEquals(a.getPosition(), new Point(8,1));
+		t.update(91);
+		assertEquals(a.getPosition(), new Point(15,1));
+		t.update(92);
+		assertEquals(a.getPosition(), new Point(22,1));
+		t.update(93);
+		assertEquals(a.getPosition(), new Point(29,1));
+		t.update(94);
+		assertEquals(a.getPosition(), new Point(36,1));
+		t.update(95);
+		assertEquals(a.getPosition(), new Point(40,4));
+		t.update(96);
+		assertEquals(a.getPosition(), new Point(40,15));
+		t.update(97);
+		assertEquals(t.getCurrentPosition(), new Point(40,26));
+		t.update(98);
+		assertEquals(a.getPosition(), new Point(40,37));
+		t.update(99);
+		assertEquals(a.getPosition(), new Point(40,40));
+	}
+	
+	@Test
+	public void TripTest5() {
+		// Rush Hour Trip Tests (crosses into non-rush)
+		Vehicle a = new Vehicle(1,1);
+		Vehicle b = new Vehicle(1,1);
+		Trip t = new Trip(new Point(1,1), new Point(40,40), a);
+		assertFalse(t.assignSAV(b));
+		
+		assertEquals(t.getStartTime(), 0);
+		assertEquals(a.getPosition(), new Point(1,1));
+		t.update(216);
+		assertEquals(a.getPosition(), new Point(8,1));
+		t.update(217);
+		assertEquals(a.getPosition(), new Point(15,1));
+		t.update(218);
+		assertEquals(a.getPosition(), new Point(22,1));
+		t.update(219);
+		assertEquals(a.getPosition(), new Point(29,1));
+		t.update(220);
+		assertEquals(a.getPosition(), new Point(36,1));
+		t.update(221);
+		assertEquals(a.getPosition(), new Point(40,4));
+		t.update(222);
+		assertEquals(a.getPosition(), new Point(40,15));
+		t.update(223);
+		assertEquals(t.getCurrentPosition(), new Point(40,26));
+		t.update(224);
+		assertEquals(a.getPosition(), new Point(40,37));
+		t.update(225);
+		assertEquals(a.getPosition(), new Point(40,40));
+		
+	}
+	
+	@Test
 	public void SimulationTest1() {
-		Simulation sim = new Simulation();
+		Simulation sim = new Simulation(false);
+		
+	}
+
+	@Test
+	public void ArrayListTest() {
+		ArrayList<Point> list = new ArrayList<Point>();
+		Point a = new Point(1,1);
+		Point b = new Point(1,1);
+		
+		list.add(a);
+		assertTrue(list.contains(b));
 	}
 }

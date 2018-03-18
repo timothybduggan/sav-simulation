@@ -4,16 +4,21 @@ import java.awt.Point;
 public class Trip {
 	private Point origin;
 	private Point destination;
+	private int startTime; // to determine when futureTrip -> waitList
 	private double waitTime; // timeSteps Waited?
 	private Vehicle assignedSAV;
 	private boolean passengerPickedUp;
 	private boolean tripComplete;
 	private boolean hasSAV;
 	
-	
 	public Trip(Point origin, Point destination, Vehicle assignedSAV) {
+		this(origin, destination, assignedSAV, 0);
+	}
+	
+	public Trip(Point origin, Point destination, Vehicle assignedSAV, int startTime) {
 		this.origin = origin;
 		this.destination = destination;
+		this.startTime = startTime;
 		this.waitTime = 0;
 		this.hasSAV = false;
 		this.assignedSAV = assignedSAV;
@@ -41,6 +46,11 @@ public class Trip {
 		return this.waitTime;
 	}
 	
+	// returns start time (useful for starting 'future' trips)
+	public int getStartTime() {
+		return this.startTime;
+	}
+	
 	// returns true if an SAV is assigned to this trip
 	public boolean hasAssignedSAV() {
 		return this.hasSAV;
@@ -52,21 +62,27 @@ public class Trip {
 	}
 	
 	// tries to assign a SAV to the user. 
-	public void assignSAV(Vehicle assignMe) {
+	public boolean assignSAV(Vehicle assignMe) {
 		if (this.assignedSAV == null) {
 			this.assignedSAV = assignMe;
 			this.assignedSAV.setState(Vehicle_State.on_trip);
 			this.assignedSAV.setTripOrigin(origin);
 			this.assignedSAV.setDestination(destination);
 			this.hasSAV = true;
+			return true;
 		} else {
 			System.out.println("Vehicle already assigned to this trip.");
+			return false;
 		}
 	}
 	
 	public void update() {
+		update(0);
+	}
+	
+	public void update(int timeStep) {
 		if (this.passengerPickedUp) {
-			this.assignedSAV.moveTowardsDestination();
+			this.assignedSAV.update(timeStep);
 			if (assignedSAV.getPosition().equals(destination)) {
 				this.tripComplete = true;
 				this.assignedSAV.setState(Vehicle_State.end_trip);
@@ -74,7 +90,7 @@ public class Trip {
 		} else if (this.assignedSAV != null) {
 			this.passengerPickedUp = true;
 			this.waitTime += this.assignedSAV.timeFrom(origin);
-			this.assignedSAV.moveTowardsDestination(); // moves towards user
+			this.assignedSAV.update(timeStep); // moves towards user
 			this.assignedSAV.addTrip();
 		} else {
 			this.waitTime += 5;
@@ -83,5 +99,13 @@ public class Trip {
 	
 	public boolean isFinished() {
 		return this.tripComplete;
+	}
+	
+	public Point getCurrentPosition() {
+		if (assignedSAV != null) {
+			return assignedSAV.getPosition();
+		}
+		
+		return null;
 	}
 }

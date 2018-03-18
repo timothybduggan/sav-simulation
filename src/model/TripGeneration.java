@@ -14,6 +14,7 @@ public class TripGeneration {
 	private int width = 40;
 	//private double[][] generationRates; // instead, get this from the map.
 	private Map map;
+	private int currentTimeStep;
 	
 	public TripGeneration(double osgr, double ocgr, double icgr, double alpha) {
 		this.outerServiceGenerationRate = osgr / 288.0;
@@ -22,6 +23,7 @@ public class TripGeneration {
 		this.alpha = alpha;
 		this.map = new Map(null, this);
 		this.map.calculateZoneGenerationRates();
+		this.currentTimeStep = 0;
 	}
 	
 	public TripGeneration() {
@@ -70,7 +72,7 @@ public class TripGeneration {
 				}
 		}	// This loop keeps us going until we find a valid destination.
 		
-		return new Trip(pos, destination, null);
+		return new Trip(pos, destination, null, currentTimeStep);
 	}
 	
 	private double probabilityEast(Point pos) {
@@ -108,7 +110,7 @@ public class TripGeneration {
 			distanceEast *= -1;	// (going west is going in the negative x)
 		}
 		
-		Point destination = new Point(start.x + distanceEast, start.y + distanceNorth);
+		Point destination = new Point(start.x + distanceNorth, start.y + distanceEast);
 		
 		return destination;
 	}
@@ -159,6 +161,8 @@ public class TripGeneration {
 			}
 		}
 		// return the list of new trips!
+		
+		currentTimeStep++;
 		return newTrips;
 	}
 }

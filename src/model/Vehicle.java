@@ -8,7 +8,6 @@ public class Vehicle {
 	private float unoccupiedMiles;	// miles driven without an occupant
 	private int timeSinceLastStart;	// for tracking cold starts (in num ticks)
 	private int coldStarts;	// number of coldstarts for this SAV
-	private boolean occupied; // is there an occupant?
 	private int numTrips;	// how many trips has this SAV done so far?
 	private Point tripOrigin;	// where is this Vehicle currently moving?
 	private Point destination;
@@ -26,7 +25,6 @@ public class Vehicle {
 		occupied = false;
 		numTrips = 0;
 		currentState = Vehicle_State.available;
-		currentTimeStep = 0;
 	}
 	
 	public Vehicle() {
@@ -54,7 +52,10 @@ public class Vehicle {
 	}
 	
 	public boolean isOccupied() {
-		return occupied;
+		if (this.currentState == Vehicle_State.on_trip && this.tripOrigin == null) {
+			return true;
+		}
+		return false;
 	}
 	
 	public int getNumTrips() {
@@ -85,6 +86,11 @@ public class Vehicle {
 	
 	public void setDestination(Point destination) {
 		this.destination = destination;
+	}
+	
+	public void update(int timeStep) {
+		this.currentTimeStep = timeStep;
+		this.moveTowardsDestination(this.getMaxSpeed());
 	}
 	
 	public void moveTowardsDestination() {
@@ -135,6 +141,7 @@ public class Vehicle {
 			}
 			
 			tripOrigin = null;
+			unoccupiedMiles += (maxShifts - remainingShifts) / 4.0;
 		}
 		
 		if (position.x < destination.x && remainingShifts > 0) {
@@ -172,7 +179,9 @@ public class Vehicle {
 				position.y = destination.y;
 			}
 		}
-		
+		if (this.currentState == Vehicle_State.on_relocation) {
+			unoccupiedMiles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+		}
 		milesDriven += (this.getMaxSpeed() - remainingShifts) / 4.0;
 	}
 	

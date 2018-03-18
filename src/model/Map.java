@@ -1,6 +1,8 @@
 package model;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Map {
 	// This is the map space
@@ -13,8 +15,9 @@ public class Map {
 	private TripGeneration tripGeneration;
 	private double[][] zoneGenerationRates;
 	static int maxDistanceFromInnerCore = 10;	// max distance from outer core to inner core
-	static int maxDistanceFromOuterCore = 5; 	// max distance from outer service to outer core
+	static int maxDistanceFromOuterCore = 20; 	// max distance from outer service to outer core
 	// Bottom left corner is (1,1)
+	private int currentTimeStep;
 	
 	public Map(ArrayList<Vehicle> cars, TripGeneration tripGeneration) {
 		// Create a link to the simulation's trip Generation module
@@ -92,17 +95,20 @@ public class Map {
 	public void calculateZoneGenerationRates() {
 		for (int i = 0; i < width; i++) {
 			for (int j = 0; j < height; j++) {
-				// find distance from point to next zone.
+				// find distance from point to next zone. [These equations are wrong]
 				Point pos = new Point(i+1,j+1);
 				if (tripGeneration.isInnerCore(pos)) {
 					zoneGenerationRates[i][j] = tripGeneration.getInnerCoreGenerationRate();
 				} else if (tripGeneration.isOuterCore(pos)) {
-					zoneGenerationRates[i][j] = (tripGeneration.getInnerCoreGenerationRate() + tripGeneration.getOuterCoreGenerationRate()) 
-												* (1.0 - (double) distanceFromInnerCore(pos) / maxDistanceFromInnerCore);
+					zoneGenerationRates[i][j] = (tripGeneration.getInnerCoreGenerationRate() - tripGeneration.getOuterCoreGenerationRate()) 
+												* (1.0 - (double) distanceFromInnerCore(pos) / maxDistanceFromInnerCore)
+												+ tripGeneration.getOuterCoreGenerationRate();
 				} else {
-					zoneGenerationRates[i][j] = (tripGeneration.getOuterCoreGenerationRate() + tripGeneration.getOuterServiceGenerationRate())
-												* (1.0 - (double) distanceFromOuterCore(pos) / maxDistanceFromOuterCore);
+					zoneGenerationRates[i][j] = (tripGeneration.getOuterCoreGenerationRate() - tripGeneration.getOuterServiceGenerationRate())
+												* (1.0 - (double) distanceFromOuterCore(pos) / maxDistanceFromOuterCore)
+												+ tripGeneration.getOuterServiceGenerationRate();
 				}
+//				System.out.println(zoneGenerationRates[i][j]);
 			}
 		}
 	}
@@ -138,15 +144,17 @@ public class Map {
 		
 		if (pos.x < 11) {
 			distance += Math.abs(pos.x - 11);
-		} else {
+		} else if (pos.x > 30) {
 			distance += Math.abs(pos.x - 30);
 		}
 		
 		if (pos.y < 11) {
 			distance += Math.abs(pos.y - 11);
-		} else {
+		} else if (pos.y > 30) {
 			distance += Math.abs(pos.y - 30);
 		}
+		
+//		System.out.println(pos + " is " + distance + " from outer core");
 		
 		return distance;
 	}
@@ -160,20 +168,101 @@ public class Map {
 		
 		if (pos.x < 16) {	// if we are west of the inner core...
 			distance += Math.abs(pos.x - 16);
-		} else {			// if we are east of the inner core...
+		} else if (pos.x > 25) {			// if we are east of the inner core...
 			distance += Math.abs(pos.x - 25);
 		}
 		
 		if (pos.y < 16) {	// if we are south of the inner core...
 			distance += Math.abs(pos.y - 16);
-		} else {			// if we are north of the inner core...
+		} else if (pos.y > 25) {			// if we are north of the inner core...
 			distance += Math.abs(pos.y - 25);
 		}
+		
+//		System.out.println(pos + " is " + distance + " from inner core");
 		
 		return distance;
 	}
 	
+	public int getMaxSpeed() {
+		if (this.isPeakHours()) {
+			return 7;
+		} else {
+			return 11;
+		}	
+	}
+	
+	private boolean isPeakHours() {
+		int currentTime = currentTimeStep % 288; // step today. 0-11 : 0000-0100 , 12-23 : 0100-0200 , erc.
+		if (currentTime >= 84 && currentTime < 96)
+			return true;
+		if (currentTime >= 192 && currentTime < 222)
+			return true;
+		
+		return false;
+	}
+	
 	public void update() {
 		this.updateVehicles();
+	}
+	
+	private ArrayList<Vehicle> getVehicleList(Point pos) {
+		return vehicleMap.get(pos.x-1).get(pos.y-1);
+	}
+	
+	private Vehicle getVehicle(Point pos) {
+		for (Vehicle car : this.getVehicleList(pos)) {
+			if (car.getState() == Vehicle_State.available)
+				return car;
+		}
+		return null;
+	}
+	
+	// Finds a vehicle within 5 minutes distance from origin
+	public Vehicle findFreeVehicle(Point origin) {
+		int radius = this.getMaxSpeed();
+		Vehicle freeSAV = null;
+		PriorityQueue<Point> queue = new PriorityQueue<Point>();
+		ArrayList<Point> visited = new ArrayList<Point>();
+		Point currPoint = origin;
+		do {
+			visited.add(currPoint);
+			freeSAV = getVehicle(currPoint);
+			if (freeSAV != null) {
+				return freeSAV;
+			}
+			
+			if (distanceFrom(origin, currPoint) < radius) {
+				if (currPoint.x > 1 ) {
+					Point newPoint = new Point(currPoint.x-1, currPoint.y);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.x < 40) {
+					Point newPoint = new Point(currPoint.x+1, currPoint.y);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.y > 1) {
+					Point newPoint = new Point(currPoint.x, currPoint.y-1);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.y < 40) {
+					Point newPoint = new Point(currPoint.x, currPoint.y+1);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+			}
+			
+			currPoint = queue.remove();
+			
+		} while (!queue.isEmpty());
+		
+		return null; // if we get here, there is no vehicle in range
+			
 	}
 }
