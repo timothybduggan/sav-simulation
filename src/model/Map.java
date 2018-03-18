@@ -1,3 +1,4 @@
+package model;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -5,6 +6,7 @@ public class Map {
 	// This is the map space
 	
 	private ArrayList<ArrayList<ArrayList<Vehicle>>> vehicleMap; // each space has a list of what cars are in it.
+	private int[][] numVehicles;
 	private ArrayList<Vehicle> vehicles;
 	static int width = 40;	// number of east/west blocks
 	static int height = 40;  // number of north/south blocks
@@ -23,28 +25,53 @@ public class Map {
 		this.vehicles = cars;
 		// Initialize the Vehicle Map
 		this.vehicleMap = new ArrayList<ArrayList<ArrayList<Vehicle>>>(width); // double array of vehicle lists
+		for (int i = 0; i < 40; i++) {
+			vehicleMap.add(new ArrayList<ArrayList<Vehicle>>());
+		}
 		for (ArrayList<ArrayList<Vehicle>> column : vehicleMap) {
-			column = new ArrayList<ArrayList<Vehicle>>(height);
-			for (@SuppressWarnings("unused") ArrayList<Vehicle> vehicles : column) {
-				vehicles = new ArrayList<Vehicle>();
+			for (int i = 0; i < 40; i++) {
+				column.add(new ArrayList<Vehicle>());
 			}
 		}
 		// Add all vehicles from the simulation to the Vehicle Map
+		if (vehicles == null) return;
+		
 		for (Vehicle car : vehicles) {
 			Point pos = car.getPosition();
 			addVehicle(pos, car);
 		}
+		
+		this.numVehicles = new int[40][40];
+		
+		countVehicles();
 	}
 
+	private void countVehicles() {
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 40; j++) {
+				numVehicles[i][j] = vehicleMap.get(i).get(j).size();
+			}
+		}
+	}
+	
+	public int[][] getNumVehicles() {
+		return this.numVehicles;
+	}
+	
 	private boolean addVehicle(Point pos, Vehicle car) {
 		if (car == null) return false;
 		// If this vehicle is not already found in that zone's list...
-		if (!vehicleMap.get(pos.x-1).get(pos.y-1).contains(car)) {
-			vehicleMap.get(pos.x-1).get(pos.y-1).add(car);	// add it to that zone's list
+		if (vehicleMap.get(pos.x-1).get(pos.y-1).size() > 0) {
+			if (!vehicleMap.get(pos.x-1).get(pos.y-1).contains(car)) {
+				vehicleMap.get(pos.x-1).get(pos.y-1).add(car);	// add it to that zone's list
+				return true;
+			}
+			return false;
+		} else {
+			vehicleMap.get(pos.x-1).get(pos.y-1).add(car);
 			return true;
 		}
-		// otherwise, return false to say we couldn't add to list 
-		return false;
+		
 	}
 	
 	// Update the map w/ current vehicle position data

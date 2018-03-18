@@ -1,3 +1,4 @@
+package model;
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -53,4 +54,19 @@ public class VehicleRelocation {
 		}
 	}
 	
+	private void relocation1() {
+		
+	}
+	
+	private void relocation2() {
+		
+	}
+	
+	private void relocation3() {
+		
+	}
+	
+	private void relocation4() {
+		
+	}
 }

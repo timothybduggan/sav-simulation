@@ -1,3 +1,6 @@
-/Trip.class
-/TripAssignment.class
-/VehicleRelocation.class
+/Visualizer.class
+/controller_view/
+/visualization/
+/Vehicle_State.class
+/model/
+/tests/

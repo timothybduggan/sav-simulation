@@ -1,3 +1,4 @@
+package model;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
@@ -29,6 +30,10 @@ public class TripGeneration {
 	
 	public Map getMap() {
 		return this.map;
+	}
+	
+	public void setMap(Map map) {
+		this.map = map;
 	}
 	
 	public double getOuterServiceGenerationRate() {
