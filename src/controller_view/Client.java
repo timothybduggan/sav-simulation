@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.util.Vector;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -11,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -46,7 +48,8 @@ public class Client extends Application {
 	private int sl = 20;
 	private Simulation sim;
 	private int[][] grid;
-
+	private View view = View.VehicleCount;
+	
 	public static void main(String[] args) {
 		launch(args);
 	}
@@ -82,6 +85,7 @@ public class Client extends Application {
 		Menu views = new Menu("Views");
 		MenuItem vc = new MenuItem("Vehicle Count");
 		MenuItem gr = new MenuItem("Generation Rates");
+		MenuItem wl = new MenuItem("Wait List Map");
 		MenuItem cd = new MenuItem("Current Demand");
 		Menu options = new Menu("Options");
 		help.setOnAction(event -> {
@@ -89,13 +93,19 @@ public class Client extends Application {
 			helpWindow.showAndWait();
 		});
 		vc.setOnAction(event -> {
+			view = View.VehicleCount;
 			updateGridVehicles();
 		});
 		gr.setOnAction(event -> {
+			view = View.GenerationRates;
 			updateGridGeneration();
 		});
+		wl.setOnAction(event -> {
+			view = View.WaitListMap;
+			updateGridWaitList();
+		});
 		
-		views.getItems().addAll(vc, gr, cd);
+		views.getItems().addAll(vc, gr, wl, cd);
 		options.getItems().addAll(views, help);
 
 		menuBar = new MenuBar();
@@ -105,6 +115,8 @@ public class Client extends Application {
 	// Initializes the Canvas (for drawing purposes)
 	private void initializeCanvas() {
 		canvas = new Canvas(width, height);
+		MouseListener mouseListener = new MouseListener();
+		canvas.setOnMouseClicked(mouseListener);
 		gc = canvas.getGraphicsContext2D();
 		resetCanvas();
 		drawingView.setCenter(canvas);
@@ -136,7 +148,7 @@ public class Client extends Application {
 		for (PaintObject po : allPaintObjects) {
 			((Tile) po).setValue(grid[i%40][i/40]);
 //			System.out.println("("+i%40+","+i/40+") = "+grid[i%40][i/40]);
-			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(255,0,0,grid[i%40][i/40]/2.0)));
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(255,0,0,Math.min(grid[i%40][i/40]/20.0, 1))));
 			((Tile) po).setSideLength(20);
 			
 			i++;
@@ -154,6 +166,23 @@ public class Client extends Application {
 		for (PaintObject po : allPaintObjects) {
 			((Tile) po).setValue("");
 			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 0, 255,grid[i%40][i/40]/105.0)));
+			((Tile) po).setSideLength(20);
+			
+			i++;
+		}
+		
+		this.resetCanvas();
+		this.drawAllPaintObjects();
+	}
+	
+	private void updateGridWaitList() {
+		int i = 0;
+		
+		grid = sim.getWaitListMap();
+		
+		for (PaintObject po : allPaintObjects) {
+			((Tile) po).setValue(grid[i%40][i/40]);
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 0, 255, Math.min(1, grid[i%40][i/40]/5.0))));
 			((Tile) po).setSideLength(20);
 			
 			i++;
@@ -194,5 +223,34 @@ public class Client extends Application {
 	private void resetCanvas() {
 		gc.setFill(Color.WHITE);
 		gc.fillRect(0, 0, width, height);
+	}
+	
+	private class MouseListener implements EventHandler<MouseEvent> {
+		
+		@Override
+		public void handle(MouseEvent event) {
+			if (event.getEventType() == MouseEvent.MOUSE_CLICKED)
+				handleClick(event);
+		}
+		
+		private void handleClick(MouseEvent event) {
+			sim.updateSimulation();
+			
+			switch(view) {
+			case VehicleCount:
+				updateGridVehicles();
+				break;
+			case GenerationRates:
+				updateGridGeneration();
+				break;
+			case WaitListMap:
+				updateGridWaitList();
+				break;
+			case CurrentDemand:
+				updateGridDemand();
+				break;
+			}
+			
+		}
 	}
 }

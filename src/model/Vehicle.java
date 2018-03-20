@@ -90,6 +90,7 @@ public class Vehicle {
 	
 	public void update(int timeStep) {
 		this.currentTimeStep = timeStep;
+		this.previousPosition = this.position;
 		if (this.destination != null) {
 			this.moveTowardsDestination(this.getMaxSpeed());
 		}
@@ -121,7 +122,7 @@ public class Vehicle {
 	}
 	
 	private void moveTowardsDestination(int maxShifts) {
-		this.previousPosition = (Point) this.position.clone(); // we are about to move, so our current position becomes our previous position
+		//this.previousPosition = (Point) this.position.clone(); // we are about to move, so our current position becomes our previous position
 		int remainingShifts = maxShifts;	// number of 1/4-mile blocks we have moved
 		
 		if (this.tripOrigin != null) {

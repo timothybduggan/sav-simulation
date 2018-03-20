@@ -66,8 +66,8 @@ public class TripGeneration {
 					double probNorth = probabilityNorth(pos);							// 3. Sample N-S Direction
 					boolean goNorth = (generator.nextDouble() < probNorth);
 					destination = chooseDestination(pos, goEast, goNorth, distance);	// 4. Select Destination
-					System.out.println("Distance: "+distance+"\tGoNorth: "+goNorth+"\tGoEast: "+goEast);
-					System.out.println("Generated destination: "+destination.toString()+" from origin: "+pos.toString());
+//					System.out.println("Distance: "+distance+"\tGoNorth: "+goNorth+"\tGoEast: "+goEast);
+//					System.out.println("Generated destination: "+destination.toString()+" from origin: "+pos.toString());
 					
 					if (i >= 20) break;	// 6. If 20 destinations have been outside the service area, return to 1.
 				}
@@ -100,7 +100,7 @@ public class TripGeneration {
 		int selection = 1;
 		for (int i = 0; i < 100; i++) {
 			selection = (int) Math.ceil(generator.nextDouble() / probDestination);
-			System.out.println(selection+"\t\t"+probDestination);
+//			System.out.println(selection+"\t\t"+probDestination);
 		}
 		int distanceNorth = distance - (selection - 1);
 		if (!goNorth) {	// if we aren't going north, we should go south.

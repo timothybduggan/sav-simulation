@@ -101,20 +101,22 @@ public class Map {
 	}
 	
 	// Update the map w/ current vehicle position data
-	private void updateVehicles() {
+	public void updateVehicles() {
 		// For each car in the simulation
+		resetVehicleMap();
+		
 		for (Vehicle car : this.vehicles) {
 			// update that car's position in the map.
-			if (car.getState() == Vehicle_State.available) {
-				// if this is the case, the car hasn't moved, so we don't need to update.
-				continue;
-			}
-			Point prev = car.getPreviousPosition();
 			Point curr = car.getPosition();
-			// remove the car from its current position
-			vehicleMap.get(prev.x-1).get(prev.y-1).remove(car);
-			// add the car to its new position
 			vehicleMap.get(curr.x-1).get(curr.y-1).add(car);
+		}
+	}
+	
+	private void resetVehicleMap() {
+		for (ArrayList<ArrayList<Vehicle>> column : vehicleMap) {
+			for (ArrayList<Vehicle> point : column) {
+				point.clear();
+			}
 		}
 	}
 	
@@ -297,4 +299,17 @@ public class Map {
 		return null; // if we get here, there is no vehicle in range
 			
 	}
+	
+	public void updateVehicleStates() {
+		this.updateVehicles();
+		
+		for (Vehicle car : vehicles) {
+			if (car.getState() != Vehicle_State.on_trip) {
+				car.setState(Vehicle_State.available);
+			}
+		}
+		
+		
+	}
+	
 }

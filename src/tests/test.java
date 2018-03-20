@@ -3,12 +3,14 @@ import static org.junit.Assert.*;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.junit.Test;
 
 import model.Map;
 import model.Simulation;
 import model.Trip;
+import model.TripAssignment;
 import model.TripGeneration;
 import model.Vehicle;
 import model.Vehicle_State;
@@ -368,6 +370,81 @@ public class test {
 
 	@Test
 	public void TripAssignmentTest() {
+		ArrayList<Vehicle> cars = initializeVehicles();
 		
+		TripGeneration tg = new TripGeneration();
+		Map map = new Map(cars, tg);
+		tg.setMap(map);
+		TripAssignment ta = new TripAssignment(tg, map);
+		
+		assertEquals(ta.getFutureTrips().size(), 0);
+		Trip t = new Trip(new Point(25,25), new Point(30,30), null, 3);
+		ta.addFutureTrip(t);
+		assertEquals(ta.getFutureTrips().size(), 1);
+		
+//		System.out.println(a.getState());
+		ta.update();
+		map.updateVehicleStates();
+		assertEquals(ta.getFutureTrips().size(), 1);
+//		System.out.println(ta.getWaitList().size());
+//		System.out.println(a.getPosition());
+//		System.out.println(a.getState());
+		ta.update();
+		map.updateVehicleStates();
+		assertEquals(ta.getFutureTrips().size(), 1);
+//		System.out.println(ta.getWaitList().size());
+//		System.out.println(a.getPosition());
+//		System.out.println(a.getState());
+		ta.update();
+		map.updateVehicleStates();
+		assertEquals(ta.getFutureTrips().size(), 1);
+//		System.out.println(ta.getWaitList().size());
+//		System.out.println(a.getPosition());
+//		System.out.println(a.getState());
+		ta.update();
+		map.updateVehicleStates();
+		assertEquals(ta.getFutureTrips().size(), 0);
+//		System.out.println(ta.getWaitList().size());
+//		System.out.println(a.getPosition());
+//		System.out.println(a.getState());
+		ta.update();
+		map.updateVehicleStates();
+//		System.out.println(ta.getWaitList().size());
+//		System.out.println(a.getPosition());
+//		System.out.println(a.getState());
+		for (int i = 0; i < 100; i++) {
+			ta.update();
+			map.updateVehicleStates();
+		}
+		
+		ta.getWaitListMap();
+		ta.getWaitList();
+		
+	}
+
+	private ArrayList<Vehicle> initializeVehicles() {
+		ArrayList<Vehicle> cars = new ArrayList<Vehicle>(1600);
+
+		for (int i = 1; i < 41; i++) {
+			for (int j = 1; j < 41; j++) {
+				Vehicle addMe = new Vehicle(i,j);
+				cars.add(addMe);
+			}
+		}
+		
+		return cars;
+	}
+
+	private void printVehicleMap(Map map) {
+
+		int[][] numVehicles = map.getNumVehicles();
+		
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 40; j++) {
+				System.out.printf("%2d,", numVehicles[i][j]);
+			}
+			System.out.println();
+		}
+		System.out.println();
 	}
 }

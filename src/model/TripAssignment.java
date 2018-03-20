@@ -30,6 +30,16 @@ public class TripAssignment {
 		return this.waitList;
 	}
 	
+	public ArrayList<Trip> getFutureTrips() {
+		return this.futureTrips;
+	}
+	
+	public void addFutureTrip(Trip newTrip) {
+		if (newTrip == null) return;
+		
+		futureTrips.add(newTrip);
+	}
+	
 	public void update() {
 		ArrayList<Trip> newTrips = tripGeneration.generateTrips();
 		for (Trip trip : newTrips) {
@@ -42,11 +52,17 @@ public class TripAssignment {
 	}
 	
 	private void checkFutureTrips() {
+		ArrayList<Trip> toRemove = new ArrayList<Trip>();
+		
 		for (Trip trip : futureTrips) {
 			if (trip.getStartTime() == this.currentTimeStep) {
-				futureTrips.remove(trip);
+				toRemove.add(trip);
 				waitList.add(trip);
 			}
+		}
+		
+		for (Trip trip : toRemove) {
+			futureTrips.remove(trip);
 		}
 	}
 	
@@ -54,13 +70,20 @@ public class TripAssignment {
 		for (Trip trip : waitList) {
 			assignTrip(trip);
 		}
+		for (Trip trip : inProgress) {
+			if (waitList.contains(trip)) {
+				waitList.remove(trip);
+			}
+		}
 	}
 	
 	private void assignTrip(Trip trip) {
 		Vehicle freeSAV = map.findFreeVehicle(trip.getOrigin());
 		if (freeSAV != null) {
-			waitList.remove(trip);
+			//waitList.remove(trip);
 			inProgress.add(trip);
+			trip.assignSAV(freeSAV);
+			freeSAV.setState(Vehicle_State.on_trip);
 		}
 	}
 	
@@ -81,12 +104,18 @@ public class TripAssignment {
 	
 	private void checkForCompletedTrips() {
 		// for all trips in inProgress, if we've finished move it
+		ArrayList<Trip> toRemove = new ArrayList<Trip>();
 		for (Trip trip : inProgress) {
 			if (trip.isFinished()) {
-				inProgress.remove(trip);
+				toRemove.add(trip);
 				completed.add(trip);
 			}
 		}
+		
+		for (Trip trip : toRemove) {
+			inProgress.remove(trip);
+		}
+		
 	}
 	
 	private void updateWaitListMap() {

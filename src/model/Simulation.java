@@ -25,25 +25,29 @@ public class Simulation extends Observable {
 		initializeVehicleRelocation();
 		
 //		printVehicleMap();
-		printGenerationRates();
+//		printGenerationRates();
 	}
 	
+	public void updateSimulation() {
+		tripAssignment.update();
+		map.updateVehicleStates();
+	}
 	
 	private void initializeVehicles(boolean random) {
 		this.vehicles = new ArrayList<Vehicle>(1601);
-		Random gen;
-		if (random) {
-			gen = new Random();
-		} else {
-			gen = new Random(10);
-		}
+//		Random gen;
+//		if (random) {
+//			gen = new Random();
+//		} else {
+//			gen = new Random(10);
+//		}
 		
 		for (int i = 1; i < 41; i++) {
 			for (int j = 1; j < 41; j++) {
-				if (gen.nextDouble() > 0.1) {
+//				if (gen.nextDouble() > 0.1) {
 					Vehicle addMe = new Vehicle(i,j);
 					this.vehicles.add(addMe);
-				}
+//				}
 			}
 		}
 	}
@@ -154,5 +158,9 @@ public class Simulation extends Observable {
 				throw new IllegalArgumentException("Vehicle State not recognized");
 			}
 		}
+	}
+	
+	public int[][] getWaitListMap() {
+		return tripAssignment.getWaitListMap();
 	}
 }
