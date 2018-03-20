@@ -6,8 +6,10 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import model.Map;
 import model.Simulation;
 import model.Trip;
+import model.TripGeneration;
 import model.Vehicle;
 import model.Vehicle_State;
 
@@ -22,6 +24,7 @@ public class test {
 		a.moveTowardsDestination();
 		assertEquals(a.getPosition().x, 34);	// row
 		assertEquals(a.getPosition().y, 18);	// column
+		assertEquals(a.getUnoccupiedMiles(), 2.75, .001);
 		a.moveTowardsDestination();
 		assertEquals(a.getPosition().x, 34);	// row
 		assertEquals(a.getPosition().y, 7);		// column
@@ -94,6 +97,7 @@ public class test {
 		assertFalse(t.isFinished());
 		assertEquals(t.getWaitTime(), 2.273, .001);
 		assertEquals(a.getMilesDriven(), 2.75, 0.001);
+		assertEquals(a.getUnoccupiedMiles(), 1.25, .001);
 		t.update();
 		assertEquals(a.getPosition().x, 10);
 		assertEquals(a.getPosition().y, 9);
@@ -153,6 +157,7 @@ public class test {
 		// secondary destination should be 10,10 to drop off user. 
 		// on first 'moveTowardsDestination', a should go from 3,4 to 1,1, then to 6,1 in one step.
 		
+		assertEquals(a.getColdStarts(), 0);
 		assertEquals(a.getNumTrips(), 0);
 		assertEquals(a.getPosition().x, 38);
 		assertEquals(a.getPosition().y, 37);
@@ -160,6 +165,7 @@ public class test {
 		assertFalse(t.isPickedUp());
 		assertFalse(t.isFinished());
 		assertEquals(t.getWaitTime(), 0, .001);
+		assertFalse(a.isOccupied());
 		t.update();
 		assertEquals(a.getNumTrips(), 1);
 		assertEquals(a.getPosition().x, 34);
@@ -168,6 +174,7 @@ public class test {
 		assertTrue(t.isPickedUp());
 		assertFalse(t.isFinished());
 		assertEquals(t.getWaitTime(), 2.273, .001);
+		assertTrue(a.isOccupied());
 		t.update();
 		assertEquals(a.getPosition().x, 31);
 		assertEquals(a.getPosition().y, 32);
@@ -253,6 +260,7 @@ public class test {
 		
 	}
 
+	// to help me understand how .contains() works
 	@Test
 	public void ArrayListTest() {
 		ArrayList<Point> list = new ArrayList<Point>();
@@ -261,5 +269,105 @@ public class test {
 		
 		list.add(a);
 		assertTrue(list.contains(b));
+		list.remove(a);
+		assertFalse(list.contains(a));
+		
+		ArrayList<Vehicle> cars = new ArrayList<Vehicle>();
+		Vehicle c = new Vehicle(1,1);
+		cars.add(c);
+		assertTrue(cars.contains(c));
+		assertEquals(cars.size(), 1);
+		cars.remove(c);
+		assertEquals(cars.size(), 0);
+		cars.add(c);
+		Vehicle d = new Vehicle(1,1);
+		assertFalse(cars.contains(d));
+	}
+
+	@Test
+	public void MapTest1() {
+		Vehicle a = new Vehicle(2,2);
+		ArrayList<Vehicle> list = new ArrayList<Vehicle>();
+		list.add(a);
+		TripGeneration tg = new TripGeneration();
+		Map map = new Map(list, tg);
+		tg.setMap(map);
+		
+		int[][] vehicleLocations = map.getNumVehicles();
+		assertEquals(vehicleLocations[0][0], 0);
+		assertEquals(vehicleLocations[1][1], 1);
+		vehicleLocations = map.getNumFreeVehicles();
+		assertEquals(vehicleLocations[1][1], 1);
+		a.setState(Vehicle_State.on_trip);
+		vehicleLocations = map.getNumFreeVehicles();
+		assertEquals(vehicleLocations[0][0], 0);
+		assertEquals(vehicleLocations[1][1], 0);
+		a.setDestination(new Point(3,3));
+		a.moveTowardsDestination();
+		map.update();
+		a.setState(Vehicle_State.available);
+		vehicleLocations = map.getNumVehicles();
+		assertEquals(vehicleLocations[1][1], 0);
+		assertEquals(vehicleLocations[2][2], 1);
+		assertEquals(map.getCurrentTimeStep(), 1);
+		assertEquals(map.getMaxSpeed(), 11);
+		for (int i = 0; i < 90; i++) {
+			map.update();
+		}
+		assertEquals(map.getMaxSpeed(), 7);
+		for (int i = 0; i < 60; i++) {
+			map.update();
+		}
+		assertEquals(map.getCurrentTimeStep(), 151);
+		assertEquals(map.getMaxSpeed(), 11);
+		for (int i = 0; i < 60; i++) {
+			map.update();
+		}
+		assertEquals(map.getMaxSpeed(), 7);
+		for (int i = 0; i < 99; i++) {
+			map.update();
+		}
+		assertEquals(map.getMaxSpeed(), 11);
+		
+		ArrayList<Vehicle> listB = map.getVehicleList(new Point(1,1));
+		assertEquals(listB.size(), 0);
+		listB = map.getVehicleList(new Point(3,3));
+		assertEquals(map.getCurrentTimeStep(), 310);
+		System.out.println(listB);
+		assertEquals(listB.size(), 1);
+		assertTrue(listB.contains(a));
+		assertEquals(map.getGenerationRate(new Point(1,1)), .03125, .000001);
+		assertEquals(map.getGenerationRate(0,0), .03125, .000001);
+		assertEquals(map.distanceFrom(new Point(1,1), new Point(40,40)), 78);
+		assertEquals(map.distanceFrom(new Point(40,40), new Point(1,1)), 78);
+		assertEquals(map.distanceFromOuterCore(new Point(25,25)), -1);
+		assertEquals(map.distanceFromOuterCore(new Point(10,1)), 11);
+		assertEquals(map.distanceFromInnerCore(new Point(20,20)), -1);
+		
+		
+		assertFalse(map.addVehicle(null));
+		assertFalse(map.addVehicle(a));
+		Vehicle b = new Vehicle(1,1);
+		assertTrue(map.addVehicle(b));
+		Vehicle c = new Vehicle(1,1);
+		assertTrue(map.addVehicle(c));
+		listB = map.getVehicleList(new Point(1,1));
+		assertEquals(listB.size(), 2);
+		
+		assertEquals(map.findFreeVehicle(new Point(40,40)), null);
+		assertEquals(map.findFreeVehicle(new Point(1,1)), b);
+		b.setState(Vehicle_State.on_trip);
+		assertEquals(map.findFreeVehicle(new Point(1,1)), c);
+//		System.out.println(a.getState() + " : " + a.getPosition());
+		assertEquals(map.findFreeVehicle(new Point(1,4)), a);
+		assertEquals(map.findFreeVehicle(new Point(3,1)), c);
+		assertEquals(map.findFreeVehicle(new Point(2,2)), c);
+		assertEquals(map.findFreeVehicle(new Point(1,3)), a);
+		assertEquals(map.findFreeVehicle(new Point(5,5)), a);
+	}
+
+	@Test
+	public void TripAssignmentTest() {
+		
 	}
 }

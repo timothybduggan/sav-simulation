@@ -1,4 +1,5 @@
 package model;
+import java.awt.Point;
 import java.util.ArrayList;
 
 // Takes Trips from TripGeneration, and assigns to nearby vehicles.
@@ -10,6 +11,7 @@ public class TripAssignment {
 	private TripGeneration tripGeneration; // local reference to tripGeneration
 	private Map map; // local reference to the map
 	private int currentTimeStep;
+	private int[][] waitListMap;
 	
 	
 	public TripAssignment(TripGeneration tripGeneration, Map map) {
@@ -20,6 +22,8 @@ public class TripAssignment {
 		
 		this.tripGeneration = tripGeneration;
 		this.map = map;
+		
+		this.waitListMap = new int[40][40];
 	}
 	
 	public ArrayList<Trip> getWaitList() {
@@ -72,6 +76,7 @@ public class TripAssignment {
 		}
 		// check if any trips have finished
 		checkForCompletedTrips();
+		updateWaitListMap();
 	}
 	
 	private void checkForCompletedTrips() {
@@ -82,5 +87,22 @@ public class TripAssignment {
 				completed.add(trip);
 			}
 		}
+	}
+	
+	private void updateWaitListMap() {
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 40; j++) {
+				waitListMap[i][j] = 0;
+			}
+		}
+		
+		for (Trip trip : waitList) {
+			Point tripPos = trip.getOrigin();
+			waitListMap[tripPos.x-1][tripPos.y-1] += 1;
+		}
+	}
+	
+	public int[][] getWaitListMap() {
+		return this.waitListMap;
 	}
 }

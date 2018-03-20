@@ -13,12 +13,27 @@ public class VehicleRelocation {
 	private int height = 40;
 	private int width = 40;
 	private Map map;
+	private int numVehicles;
 	
-	public VehicleRelocation() {
+	public VehicleRelocation(TripAssignment tripAssignment, TripGeneration tripGeneration, Map map, ArrayList<Vehicle> vehicles) {
+		this.tripAssignment = tripAssignment;
+		this.tripGeneration = tripGeneration;
+		this.map = map;
+		this.allVehicles = vehicles;
+		this.numVehicles = vehicles.size();
 		
+		calculateGeneratedDemand();
 	}
 	
 	private void calculateGeneratedDemand() {
+		double[][] generationRates = map.getGenerationRates();
+		totalGeneratedDemand = 0;
+		
+		for (int i = 0; i < generationRates.length; i++) {
+			for (int j = 0; j < generationRates[i].length; j++) {
+				totalGeneratedDemand += generationRates[i][j];
+			}
+		}
 		
 	}
 	
@@ -65,26 +80,260 @@ public class VehicleRelocation {
 		}
 	}
 	
-	private void relocation1() {
+	private void applyR1() {
+		
+		double[][] blocks = calculateBlocksR1();
+		double maxBlock = maxBlockValue(blocks);
+		double minBlock = minBlockValue(blocks);
+		
+		while (maxBlock > 10 || minBlock < 10) {
+			Point nextBlock;
+			double blockVal;
+			
+			if (maxBlock > -1*minBlock) {
+				nextBlock = maxBlockPosition(blocks);
+				blockVal = maxBlock;
+			} else {
+				nextBlock = minBlockPosition(blocks);
+				blockVal = minBlock;
+			}
+			
+			balanceBlockR1(nextBlock, blocks);
+			
+			
+			blocks = calculateBlocksR1();
+			maxBlock = maxBlockValue(blocks);
+			minBlock = minBlockValue(blocks);
+		}
+	}
+	
+	private double[][] calculateBlocksR1() {
+		double totalDemand = calculateTotalDemand();
+		double[][] blocks = new double[5][5];
+		int totalFreeVehicles = totalFreeVehicles();
+		
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				blocks[i][j] = totalFreeVehicles * (((double) vehiclesInBlockR1(i,j) / (double) totalFreeVehicles)
+											        - (demandInBlockR1(i,j) / totalDemand));
+			}
+		}
+		
+		return blocks;
+	}
+	
+	private double[][] calculateBlocksR2() {
+		double totalDemand = calculateTotalDemand();
+		double[][] blocks = new double[10][10];
+		int totalFreeVehicles = totalFreeVehicles();
+		
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				blocks[i][j] = totalFreeVehicles * (((double) vehiclesInBlockR2(i,j) / (double) totalFreeVehicles)
+													- (demandInBlockR2(i,j) / totalDemand));
+			}
+		}
+		
+		return blocks;
+	}
+	
+	private double demandInBlockR1(int i, int j) {
+		double[][] generatedDemand = map.getGenerationRates();
+		int[][] waitingDemand = tripAssignment.getWaitListMap();
+		double demandInBlock = 0;
+		
+		for (int k = 0; k < 64; k++) {
+			demandInBlock += generatedDemand[8*i + k%8][8*j + k/8];
+			demandInBlock += waitingDemand[8*i + k%8][8*j + k/8];
+		}
+		
+		return demandInBlock;
+	}
+
+	private double demandInBlockR2(int i, int j) {
+		double[][] generatedDemand = map.getGenerationRates();
+		int[][] waitingDemand = tripAssignment.getWaitListMap();
+		double demandInBlock = 0;
+		
+		for (int k = 0; k < 16; k++) {
+			demandInBlock += generatedDemand[4*i + k%4][4*j + k/4];
+			demandInBlock += waitingDemand[4*i + k%4][4*j + k/4];
+		}
+		
+		return demandInBlock;
+	}
+	
+	private int totalFreeVehicles() {
+		int[][] numVehicles = map.getNumFreeVehicles();
+		int totalFreeVehicles = 0;
+		
+		for (int i = 0; i < numVehicles.length; i++) {
+			for (int j = 0; j < numVehicles[i].length; j++) {
+				totalFreeVehicles += numVehicles[i][j];
+			}
+		}
+		
+		return totalFreeVehicles;
+	}
+	
+	// returns num vehicles in a given block
+	private int vehiclesInBlockR1(int i, int j) {
+		int[][] numVehicles = map.getNumFreeVehicles();
+		int vehiclesInBlock = 0;
+		
+		for (int k = 0; k < 64; k++) {
+			vehiclesInBlock += numVehicles[8*i + k%8][8*j + k/8];
+		}
+		
+		return vehiclesInBlock;
+	}
+	
+	private int vehiclesInBlockR2(int i, int j) {
+		int[][] numVehicles = map.getNumFreeVehicles();
+		int vehiclesInBlock = 0;
+		
+		for (int k = 0; k < 16; k++) {
+			vehiclesInBlock += numVehicles[4*i + k%4][4*j + k/4];
+		}
+		
+		return vehiclesInBlock;	
+	}
+	
+	private double maxBlockValue(double[][] blocks) {
+		if (blocks == null) return -1;
+		double maxBlock = blocks[0][0];
+		for (int i = 0; i < blocks.length; i++) {
+			for (int j = 0; j < blocks[i].length; j++) {
+				if (blocks[i][j] > maxBlock) {
+					maxBlock = blocks[i][j];
+				}
+			}
+		}
+		
+		return maxBlock;
+	}
+	
+	private double minBlockValue(double[][] blocks) {
+		if (blocks == null) return +1;
+		double minBlock = blocks[0][0];
+		for (int i = 0; i < blocks.length; i++) {
+			for (int j = 0; j < blocks[i].length; j++) {
+				if (blocks[i][j] < minBlock) {
+					minBlock = blocks[i][j];
+				}
+			}
+		}
+		
+		return minBlock;
+	}
+	
+	private Point maxBlockPosition(double[][] blocks) {
+		double maxValue = blocks[0][0];
+		Point maxPosition = new Point(0,0);
+		
+		for (int i = 0; i < blocks.length; i++) {
+			for (int j = 0; j < blocks[i].length; j++) {
+				if (blocks[i][j] > maxValue) {
+					maxValue = blocks[i][j];
+					maxPosition.x = i;
+					maxPosition.y = j;
+				}
+			}
+		}
+		
+		return maxPosition;
+	}
+	
+	private Point minBlockPosition(double[][] blocks) {
+		double minValue = blocks[0][0];
+		Point minPosition = new Point(0,0);
+		
+		for (int i = 0; i < blocks.length; i++) {
+			for (int j = 0; j < blocks[i].length; j++) {
+				if (blocks[i][j] < minValue) {
+					minValue = blocks[i][j];
+					minPosition.x = i;
+					minPosition.y = j;
+				}
+			}
+		}
+		
+		return minPosition;
+	}
+	
+	private double calculateTotalDemand() {
+		double totalDemand = totalGeneratedDemand;
+		totalDemand += tripAssignment.getWaitList().size();
+		
+		return totalDemand;
+	}
+	
+	private void balanceBlockR1(Point block, double[][] blocks) {
+		int numFreeSAV = 0;
+		double blockVal = blocks[block.x][block.y];
+		boolean hasNorth, hasSouth, hasEast, hasWest;
+		boolean[] hasDirection = new boolean[4]; // 0-north, 1-east, 2-south, 3-west
+		double[] adjacentBlockVals = new double[4]; // 0-north, 1-east, 2-south, 3-west
+		int[] adjacentBlockVehicles = new int[4]; // 0-north, 1-east, 2-south, 3-west
+		double diffBlocks = 5;
+		
+		if (block.x > 0) hasWest = true;
+		else hasWest = false;
+		if (block.x < 4) hasEast = true;
+		else hasEast = false;
+		if (block.y > 0) hasSouth = true;
+		else hasSouth = false;
+		if (block.y < 4) hasNorth = true;
+		else hasNorth = false;
+		
+		// while there are still savs, 10% threshold exceeded, AND TODO: sav relocation will improve balances by >= 1
+		while ((blockVal > 10 || blockVal < 10) && (numFreeSAV > 0)) {
+		
+			if (blockVal > 0) {
+				numFreeSAV = vehiclesInBlockR1(block.x, block.y);
+				if (hasWest) adjacentBlockVals[3] = blocks[block.x-1][block.y];
+				if (hasEast) adjacentBlockVals[1] = blocks[block.x+1][block.y];
+				if (hasSouth) adjacentBlockVals[2] = blocks[block.x][block.y-1];
+				if (hasNorth) adjacentBlockVals[0] = blocks[block.x][block.y-1];
+				
+				
+			} else {
+				if (hasWest) {
+					numFreeSAV += vehiclesInBlockR1(block.x - 1, block.y);
+					adjacentBlockVals[3] = blocks[block.x-1][block.y];
+				}
+				if (hasEast) {
+					numFreeSAV += vehiclesInBlockR1(block.x + 1, block.y);
+					adjacentBlockVals[1] = blocks[block.x+1][block.y];
+				}
+				if (hasSouth) {
+					numFreeSAV += vehiclesInBlockR1(block.x, block.y - 1);
+					adjacentBlockVals[2] = blocks[block.x][block.y-1];
+				}
+				if (hasNorth) {
+					numFreeSAV += vehiclesInBlockR1(block.x, block.y + 1);
+					adjacentBlockVals[0] = blocks[block.x][block.y+1];
+				}
+			}
+		}
+	}
+	
+	private void applyR2() {
 		
 	}
 	
-	private void relocation2() {
+	private void applyR3() {
 		
 	}
 	
-	private void relocation3() {
-		
-	}
-	
-	private void relocation4() {
+	private void applyR4() {
 		
 	}
 	
 	public void update() {
-		relocation1();
-		relocation2();
-		relocation3();
-		relocation4();
+		applyR1();
+		applyR2();
+		applyR3();
+		applyR4();
 	}
 }

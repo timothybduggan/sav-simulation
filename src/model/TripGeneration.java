@@ -36,6 +36,7 @@ public class TripGeneration {
 	
 	public void setMap(Map map) {
 		this.map = map;
+		this.map.calculateZoneGenerationRates();
 	}
 	
 	public double getOuterServiceGenerationRate() {

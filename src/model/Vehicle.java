@@ -22,8 +22,8 @@ public class Vehicle {
 		milesDriven = 0;
 		unoccupiedMiles = 0;
 		timeSinceLastStart = 0;
-		occupied = false;
 		numTrips = 0;
+		timeSinceLastStart = 0;
 		currentState = Vehicle_State.available;
 	}
 	
@@ -90,7 +90,9 @@ public class Vehicle {
 	
 	public void update(int timeStep) {
 		this.currentTimeStep = timeStep;
-		this.moveTowardsDestination(this.getMaxSpeed());
+		if (this.destination != null) {
+			this.moveTowardsDestination(this.getMaxSpeed());
+		}
 	}
 	
 	public void moveTowardsDestination() {
@@ -144,45 +146,51 @@ public class Vehicle {
 			unoccupiedMiles += (maxShifts - remainingShifts) / 4.0;
 		}
 		
-		if (position.x < destination.x && remainingShifts > 0) {
-			if (remainingShifts < (destination.x - position.x)) { // fewer moves than we need
-				position.x = position.x + remainingShifts;
-				remainingShifts = 0;
-			} else {
-				remainingShifts -= (destination.x - position.x);
-				position.x = destination.x;
+		if (this.destination != null) {
+			if (position.x < destination.x && remainingShifts > 0) {
+				if (remainingShifts < (destination.x - position.x)) { // fewer moves than we need
+					position.x = position.x + remainingShifts;
+					remainingShifts = 0;
+				} else {
+					remainingShifts -= (destination.x - position.x);
+					position.x = destination.x;
+				}
+			} else if (position.x > destination.x && remainingShifts > 0) {
+				if (remainingShifts < (position.x - destination.x)) { // fewer moves than needed
+					position.x = position.x - remainingShifts;
+					remainingShifts = 0;
+				} else {
+					remainingShifts -= (position.x - destination.x);
+					position.x = destination.x;
+				}
 			}
-		} else if (position.x > destination.x && remainingShifts > 0) {
-			if (remainingShifts < (position.x - destination.x)) { // fewer moves than needed
-				position.x = position.x - remainingShifts;
-				remainingShifts = 0;
-			} else {
-				remainingShifts -= (position.x - destination.x);
-				position.x = destination.x;
-			}
-		}
 		
-		if (position.y < destination.y && remainingShifts > 0) {
-			if (remainingShifts < (destination.y - position.y)) { // fewer moves than we need
-				position.y = position.y + remainingShifts;
-				remainingShifts = 0;
-			} else {
-				remainingShifts -= (destination.y - position.y);
-				position.y = destination.y;
+			if (position.y < destination.y && remainingShifts > 0) {
+				if (remainingShifts < (destination.y - position.y)) { // fewer moves than we need
+					position.y = position.y + remainingShifts;
+					remainingShifts = 0;
+				} else {
+					remainingShifts -= (destination.y - position.y);
+					position.y = destination.y;
+				}
+			} else if (position.y > destination.y && remainingShifts > 0) {
+				if (remainingShifts < (position.y - destination.y)) { // fewer moves than needed
+					position.y = position.y - remainingShifts;
+					remainingShifts = 0;
+				} else {
+					remainingShifts -= (position.y - destination.y);
+					position.y = destination.y;
+				}
 			}
-		} else if (position.y > destination.y && remainingShifts > 0) {
-			if (remainingShifts < (position.y - destination.y)) { // fewer moves than needed
-				position.y = position.y - remainingShifts;
-				remainingShifts = 0;
-			} else {
-				remainingShifts -= (position.y - destination.y);
-				position.y = destination.y;
+			if (this.currentState != Vehicle_State.on_trip) {
+				unoccupiedMiles += (this.getMaxSpeed() - remainingShifts) / 4.0;
 			}
+			if (this.position.equals(this.destination)) { // when we arrive, remove the destination
+				this.destination = null;
+			}
+			
+			milesDriven += (this.getMaxSpeed() - remainingShifts) / 4.0;
 		}
-		if (this.currentState == Vehicle_State.on_relocation) {
-			unoccupiedMiles += (this.getMaxSpeed() - remainingShifts) / 4.0;
-		}
-		milesDriven += (this.getMaxSpeed() - remainingShifts) / 4.0;
 	}
 	
 	private boolean isPeakHours() {

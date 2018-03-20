@@ -119,13 +119,16 @@ public class Simulation extends Observable {
 	private void printGenerationRates() {
 		
 		double[][] genRates = map.getGenerationRates();
+		double total = 0;
 		
 		for (int i = 0; i < 40; i++) {
 			for (int j = 0; j < 40; j++) {
 				System.out.printf("%4.2f,", genRates[i][j]);
+				total += genRates[i][j];
 			}
 			System.out.println();
 		}
+		System.out.println("Total: " + total);
 	}
 	
 	private void update() {

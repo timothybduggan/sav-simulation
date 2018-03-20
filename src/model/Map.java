@@ -1,6 +1,7 @@
 package model;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
@@ -9,6 +10,7 @@ public class Map {
 	
 	private ArrayList<ArrayList<ArrayList<Vehicle>>> vehicleMap; // each space has a list of what cars are in it.
 	private int[][] numVehicles;
+	private int[][] numFreeVehicles;
 	private ArrayList<Vehicle> vehicles;
 	static int width = 40;	// number of east/west blocks
 	static int height = 40;  // number of north/south blocks
@@ -40,13 +42,14 @@ public class Map {
 		if (vehicles == null) return;
 		
 		for (Vehicle car : vehicles) {
-			Point pos = car.getPosition();
-			addVehicle(pos, car);
+			addVehicle(car);
 		}
 		
 		this.numVehicles = new int[40][40];
+		this.numFreeVehicles = new int[40][40];
 		
 		countVehicles();
+		countFreeVehicles();
 	}
 
 	private void countVehicles() {
@@ -57,12 +60,32 @@ public class Map {
 		}
 	}
 	
+	private void countFreeVehicles() {
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 40; j++) {
+				numFreeVehicles[i][j] = 0;
+				for (Vehicle car : vehicleMap.get(i).get(j)) {
+					if (car.getState() != Vehicle_State.on_trip) {
+						numFreeVehicles[i][j] += 1; 
+					}
+				}
+			}
+		}
+	}
+	
 	public int[][] getNumVehicles() {
+		this.countVehicles();
 		return this.numVehicles;
 	}
 	
-	private boolean addVehicle(Point pos, Vehicle car) {
+	public int[][] getNumFreeVehicles() {
+		this.countFreeVehicles();
+		return this.numFreeVehicles;
+	}
+	
+	public boolean addVehicle(Vehicle car) {
 		if (car == null) return false;
+		Point pos = car.getPosition();
 		// If this vehicle is not already found in that zone's list...
 		if (vehicleMap.get(pos.x-1).get(pos.y-1).size() > 0) {
 			if (!vehicleMap.get(pos.x-1).get(pos.y-1).contains(car)) {
@@ -82,6 +105,10 @@ public class Map {
 		// For each car in the simulation
 		for (Vehicle car : this.vehicles) {
 			// update that car's position in the map.
+			if (car.getState() == Vehicle_State.available) {
+				// if this is the case, the car hasn't moved, so we don't need to update.
+				continue;
+			}
 			Point prev = car.getPreviousPosition();
 			Point curr = car.getPosition();
 			// remove the car from its current position
@@ -203,9 +230,14 @@ public class Map {
 	
 	public void update() {
 		this.updateVehicles();
+		this.currentTimeStep++;
 	}
 	
-	private ArrayList<Vehicle> getVehicleList(Point pos) {
+	public int getCurrentTimeStep() {
+		return this.currentTimeStep;
+	}
+	
+	public ArrayList<Vehicle> getVehicleList(Point pos) {
 		return vehicleMap.get(pos.x-1).get(pos.y-1);
 	}
 	
@@ -221,7 +253,7 @@ public class Map {
 	public Vehicle findFreeVehicle(Point origin) {
 		int radius = this.getMaxSpeed();
 		Vehicle freeSAV = null;
-		PriorityQueue<Point> queue = new PriorityQueue<Point>();
+		LinkedList<Point> queue = new LinkedList<Point>();
 		ArrayList<Point> visited = new ArrayList<Point>();
 		Point currPoint = origin;
 		do {
