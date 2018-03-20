@@ -163,4 +163,8 @@ public class Simulation extends Observable {
 	public int[][] getWaitListMap() {
 		return tripAssignment.getWaitListMap();
 	}
+	
+	public int[][] getTotalTripRequests() {
+		return tripAssignment.getNewDemandMap();
+	}
 }

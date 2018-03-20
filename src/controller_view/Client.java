@@ -3,7 +3,10 @@ package controller_view;
 import java.awt.Point;
 import java.util.Vector;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -16,6 +19,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import visualization.ColorTypeConverter;
 import visualization.Line;
 import visualization.PaintObject;
@@ -75,6 +79,9 @@ public class Client extends Application {
 		initializeGrid();
 		updateGridVehicles();
 		
+		refresher.setCycleCount(Timeline.INDEFINITE);
+		refresher.play();
+		
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
@@ -86,7 +93,7 @@ public class Client extends Application {
 		MenuItem vc = new MenuItem("Vehicle Count");
 		MenuItem gr = new MenuItem("Generation Rates");
 		MenuItem wl = new MenuItem("Wait List Map");
-		MenuItem cd = new MenuItem("Current Demand");
+		MenuItem cd = new MenuItem("Total Trip Requests");
 		Menu options = new Menu("Options");
 		help.setOnAction(event -> {
 			Alert helpWindow = new HelpWindow();
@@ -103,6 +110,10 @@ public class Client extends Application {
 		wl.setOnAction(event -> {
 			view = View.WaitListMap;
 			updateGridWaitList();
+		});
+		cd.setOnAction(event -> {
+			view = View.CurrentDemand;
+			updateGridNewTrips();
 		});
 		
 		views.getItems().addAll(vc, gr, wl, cd);
@@ -192,22 +203,21 @@ public class Client extends Application {
 		this.drawAllPaintObjects();
 	}
 	
-	private void updateGridDemand() {
+	private void updateGridNewTrips() {
 		int i = 0;
 		
-		grid = sim.getEstimatedDemand();
+		grid = sim.getTotalTripRequests();
+		
 		for (PaintObject po : allPaintObjects) {
-			if (i >= 100) {
-				((Tile) po).setSideLength(0);
-				continue;
-			}
-			
-			((Tile) po).setValue(10);
-			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 255, 0,grid[i%10][i/10] / 25.0)));
-			((Tile) po).setSideLength(80);
+			((Tile) po).setValue(grid[i%40][i/40]);
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 255, 0, Math.min(1, grid[i%40][i/40]/20.0))));
+			((Tile) po).setSideLength(20);
 			
 			i++;
 		}
+		
+		this.resetCanvas();
+		this.drawAllPaintObjects();
 	}
 	
 	// Draws all paint objects (in vector), including currentPaintObject
@@ -225,32 +235,52 @@ public class Client extends Application {
 		gc.fillRect(0, 0, width, height);
 	}
 	
+	
+	/**
+	 * This is used for regularly updating the shown Queue.
+	 */
+	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.5), new EventHandler<ActionEvent>() {
+		@Override
+		public void handle(ActionEvent event) {
+			updateSimulation();
+		}
+	}));
+	
+	private void updateSimulation() {
+		if (!automate) return;
+		
+		sim.updateSimulation();
+		
+		switch(view) {
+		case VehicleCount:
+			updateGridVehicles();
+			break;
+		case GenerationRates:
+			updateGridGeneration();
+			break;
+		case WaitListMap:
+			updateGridWaitList();
+			break;
+		case CurrentDemand:
+			updateGridNewTrips();
+			break;
+		}
+	}
+	
+	private boolean automate = false;
+	
 	private class MouseListener implements EventHandler<MouseEvent> {
+		
+		
 		
 		@Override
 		public void handle(MouseEvent event) {
 			if (event.getEventType() == MouseEvent.MOUSE_CLICKED)
-				handleClick(event);
+				handleClick();
 		}
 		
-		private void handleClick(MouseEvent event) {
-			sim.updateSimulation();
-			
-			switch(view) {
-			case VehicleCount:
-				updateGridVehicles();
-				break;
-			case GenerationRates:
-				updateGridGeneration();
-				break;
-			case WaitListMap:
-				updateGridWaitList();
-				break;
-			case CurrentDemand:
-				updateGridDemand();
-				break;
-			}
-			
+		void handleClick() {
+			automate = !automate;
 		}
 	}
 }

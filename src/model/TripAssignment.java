@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 // Takes Trips from TripGeneration, and assigns to nearby vehicles.
 public class TripAssignment {
+	private ArrayList<Trip> newTrips;
 	private ArrayList<Trip> waitList; // trips w/o SAV assigned
 	private ArrayList<Trip> futureTrips; // for 'return' trips 
 	private ArrayList<Trip> inProgress; // trips w/ SAV assigned
@@ -12,18 +13,20 @@ public class TripAssignment {
 	private Map map; // local reference to the map
 	private int currentTimeStep;
 	private int[][] waitListMap;
-	
+	private int[][] demandMap;
 	
 	public TripAssignment(TripGeneration tripGeneration, Map map) {
 		this.waitList = new ArrayList<Trip>();
 		this.inProgress = new ArrayList<Trip>();
 		this.futureTrips = new ArrayList<Trip>();
 		this.completed = new ArrayList<Trip>();
+		this.newTrips = new ArrayList<Trip>();
 		
 		this.tripGeneration = tripGeneration;
 		this.map = map;
 		
 		this.waitListMap = new int[40][40];
+		this.demandMap = new int[40][40];
 	}
 	
 	public ArrayList<Trip> getWaitList() {
@@ -41,7 +44,7 @@ public class TripAssignment {
 	}
 	
 	public void update() {
-		ArrayList<Trip> newTrips = tripGeneration.generateTrips();
+		newTrips = tripGeneration.generateTrips();
 		for (Trip trip : newTrips) {
 			waitList.add(trip);
 		}
@@ -134,4 +137,16 @@ public class TripAssignment {
 	public int[][] getWaitListMap() {
 		return this.waitListMap;
 	}
+	
+	public int[][] getNewDemandMap() {
+		
+		for (Trip trip : newTrips) {
+			Point tripPos = trip.getOrigin();
+			demandMap[tripPos.x-1][tripPos.y-1] += 1;
+		}
+		
+		return demandMap;
+	}
+	
+	
 }
