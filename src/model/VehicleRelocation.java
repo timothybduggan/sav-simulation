@@ -1,6 +1,7 @@
 package model;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class VehicleRelocation {
 	private double[][] estimatedDemandR1;
@@ -322,17 +323,136 @@ public class VehicleRelocation {
 		
 	}
 	
-	private void applyR3() {
+	public void applyR3() {
 		
+		for (Vehicle vehicle : allVehicles) {
+			
+			if (vehicle.getState() != Vehicle_State.available) continue;
+			
+			Point moveTo = searchR3(vehicle.getPosition());
+			
+			if (moveTo == null) continue;
+			
+			map.moveVehicle(vehicle, moveTo);
+			vehicle.setDestination(moveTo);
+			vehicle.update(0);
+			vehicle.setState(Vehicle_State.on_relocation);
+		}
 	}
 	
-	private void applyR4() {
+	private Point searchR3(Point pos) {
+		if (map.freeVehiclesAt(pos) <= 1) return null;
+		
+		LinkedList<Point> queue = new LinkedList<Point>();
+		ArrayList<Point> list = new ArrayList<Point>();
+		ArrayList<Point> visited = new ArrayList<Point>();
+		int radius = 2;
+		Point currPoint = pos;
+		
+		
+		
+		do {
+			visited.add(currPoint);
+			
+			if (map.distanceFrom(pos, currPoint) < radius) {
+				if (currPoint.x > 1) {
+					Point newPoint = new Point(currPoint.x-1, currPoint.y);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.x < 40) {
+					Point newPoint = new Point(currPoint.x+1, currPoint.y);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.y > 1) {
+					Point newPoint = new Point(currPoint.x, currPoint.y-1);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+				if (currPoint.y < 40) {
+					Point newPoint = new Point(currPoint.x, currPoint.y+1);
+					if (!queue.contains(newPoint) && !visited.contains(newPoint)) {
+						queue.add(newPoint);
+					}
+				}
+			}
+			
+			if (map.freeVehiclesAt(currPoint) == 0) list.add(currPoint);
+			
+			currPoint = queue.remove();
+			
+		} while (!queue.isEmpty());
+		
+		double maxRate = 0;
+		Point bestPos = null;
+		
+		for (Point point : list) {
+			if (map.getGenerationRate(point) > maxRate) {
+				maxRate = map.getGenerationRate(point);
+				bestPos = point;
+			}
+		}
+		
+		return bestPos;
+	}
+	
+	public void applyR4() {
+		for (Vehicle vehicle : allVehicles) {
+			
+			if (vehicle.getState() != Vehicle_State.available) continue;
+			
+			Point moveTo = searchR4(vehicle.getPosition());
+			
+			if (moveTo == null) continue;
+			
+			map.moveVehicle(vehicle, moveTo);
+			vehicle.setDestination(moveTo);
+			vehicle.update(0);
+			vehicle.setState(Vehicle_State.on_relocation);
+		}
+	}
+	
+	private Point searchR4(Point pos) {
+		if (map.freeVehiclesAt(pos) < 3) return null;
+		
+		int vehiclesAtPos = map.freeVehiclesAt(pos);
+		
+		ArrayList<Point> list = new ArrayList<Point>();
+		
+		if (pos.x > 1 && map.freeVehiclesAt(new Point(pos.x-1, pos.y)) <= vehiclesAtPos - 3) {
+			list.add(new Point(pos.x-1, pos.y));
+		}
+		if (pos.x < 40 && map.freeVehiclesAt(new Point(pos.x+1, pos.y)) <= vehiclesAtPos - 3) {
+			list.add(new Point(pos.x+1, pos.y));
+		}
+		if (pos.y > 1 && map.freeVehiclesAt(new Point(pos.x, pos.y-1)) <= vehiclesAtPos - 3) {
+			list.add(new Point(pos.x, pos.y-1));
+		}
+		if (pos.y < 40 && map.freeVehiclesAt(new Point(pos.x, pos.y+1)) <= vehiclesAtPos - 3) {
+			list.add(new Point(pos.x, pos.y+1));
+		}
+		
+		double maxRate = 0;
+		Point bestPos = null;
+		
+		for (Point point : list) {
+			if (map.getGenerationRate(point) > maxRate) {
+				maxRate = map.getGenerationRate(point);
+				bestPos = point;
+			}
+		}
+		
+		return bestPos;
 		
 	}
 	
 	public void update() {
-		applyR1();
-		applyR2();
+//		applyR1();
+//		applyR2();
 		applyR3();
 		applyR4();
 	}

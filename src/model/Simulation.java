@@ -30,6 +30,7 @@ public class Simulation extends Observable {
 	
 	public void updateSimulation() {
 		tripAssignment.update();
+		vehicleRelocation.update();
 		map.updateVehicleStates();
 	}
 	
@@ -64,7 +65,7 @@ public class Simulation extends Observable {
 	}
 	
 	private void initializeVehicleRelocation() {
-		
+		vehicleRelocation = new VehicleRelocation(tripAssignment, tripGeneration, map, vehicles);
 	}
 	
 	public TripAssignment getTripAssignment() {
@@ -165,6 +166,6 @@ public class Simulation extends Observable {
 	}
 	
 	public int[][] getTotalTripRequests() {
-		return tripAssignment.getNewDemandMap();
+		return tripAssignment.getTotalDemandMap();
 	}
 }

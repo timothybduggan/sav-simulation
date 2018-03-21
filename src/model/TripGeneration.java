@@ -27,7 +27,7 @@ public class TripGeneration {
 	}
 	
 	public TripGeneration() {
-		this(9.0, 27.0, 30.0, 0.5);
+		this(9.0, 27.0, 30.0, 0.99);
 	}
 	
 	public Map getMap() {

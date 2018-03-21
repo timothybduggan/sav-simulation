@@ -210,7 +210,7 @@ public class Client extends Application {
 		
 		for (PaintObject po : allPaintObjects) {
 			((Tile) po).setValue(grid[i%40][i/40]);
-			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 255, 0, Math.min(1, grid[i%40][i/40]/20.0))));
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(0, 255, 0, Math.min(1, grid[i%40][i/40]/100.0))));
 			((Tile) po).setSideLength(20);
 			
 			i++;
