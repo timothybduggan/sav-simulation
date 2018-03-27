@@ -27,7 +27,7 @@ public class TripGeneration {
 	}
 	
 	public TripGeneration() {
-		this(9.0, 27.0, 30.0, 0.5);
+		this(9.0, 27.0, 30.0, 0.99);
 	}
 	
 	public Map getMap() {
@@ -80,7 +80,7 @@ public class TripGeneration {
 		int zonesEast = width - pos.x;
 		int zonesWest = width - zonesEast - 1; 
 		
-		double prob = alpha * (zonesEast) / (zonesEast + zonesWest) + (1 - alpha) * 0.5;
+		double prob = alpha * (zonesEast) / (zonesEast + zonesWest) + (1.0 - alpha) * 0.5;
 		
 		return prob;
 	}
@@ -89,7 +89,7 @@ public class TripGeneration {
 		int zonesNorth = height - pos.y;
 		int zonesSouth = height - zonesNorth - 1;
 		
-		double prob = alpha * (zonesNorth) / (zonesNorth + zonesSouth) + (1 - alpha) * 0.5;
+		double prob = alpha * (zonesNorth) / (zonesNorth + zonesSouth) + (1.0 - alpha) * 0.5;
 		
 		return prob;
 	}
