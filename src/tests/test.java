@@ -485,6 +485,31 @@ public class test {
 		assertEquals(c.getPosition(), new Point(1,1));
 		assertEquals(d.getPosition(), new Point(1,1));
 		assertEquals(e.getPosition(), new Point(2,1));
+		
+		cars.clear();
+		a = new Vehicle(40,40);
+		b = new Vehicle(40,40);
+		c = new Vehicle(40,40);
+		d = new Vehicle(40,40);
+		e = new Vehicle(39,40);
+		cars.add(a);
+		cars.add(b);
+		cars.add(c);
+		cars.add(d);
+		cars.add(e);
+		tg = new TripGeneration();
+		map = new Map(cars, tg);
+		tg.setMap(map);
+		ta = new TripAssignment(tg, map);
+		vr = new VehicleRelocation(ta, tg, map, cars);
+		
+		vr.applyR4();
+		map.updateVehicleStates();
+		assertEquals(a.getPosition(), new Point(39,40));
+		assertEquals(b.getPosition(), new Point(40,39));
+		assertEquals(c.getPosition(), new Point(40,40));
+		assertEquals(d.getPosition(), new Point(40,40));
+		assertEquals(e.getPosition(), new Point(39,40));
 	}
 	
 	private ArrayList<Vehicle> initializeVehicles() {

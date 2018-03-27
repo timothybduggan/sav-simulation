@@ -94,6 +94,10 @@ public class Client extends Application {
 		MenuItem gr = new MenuItem("Generation Rates");
 		MenuItem wl = new MenuItem("Wait List Map");
 		MenuItem cd = new MenuItem("Total Trip Requests");
+		Menu scenarios = new Menu("Scenarios");
+		MenuItem def = new MenuItem("Default");
+		MenuItem r3 = new MenuItem("R3 Demo");
+		MenuItem r4 = new MenuItem("R4 Demo");
 		Menu options = new Menu("Options");
 		help.setOnAction(event -> {
 			Alert helpWindow = new HelpWindow();
@@ -115,12 +119,29 @@ public class Client extends Application {
 			view = View.CurrentDemand;
 			updateGridNewTrips();
 		});
+		def.setOnAction(event -> {
+			view = View.VehicleCount;
+			sim.initializeDefault(true);
+			updateGridVehicles();
+		});
+		r3.setOnAction(event -> {
+			view = View.VehicleCount;
+			sim.initializeScenario(3);
+			updateGridVehicles();
+		});
+		r4.setOnAction(event -> {
+			view = View.VehicleCount;
+			sim.initializeScenario(4);
+			updateGridVehicles();
+					
+		});
 		
 		views.getItems().addAll(vc, gr, wl, cd);
+		scenarios.getItems().addAll(def, r3, r4);
 		options.getItems().addAll(views, help);
 
 		menuBar = new MenuBar();
-		menuBar.getMenus().addAll(options);
+		menuBar.getMenus().addAll(options, scenarios);
 	}
 
 	// Initializes the Canvas (for drawing purposes)
@@ -159,7 +180,7 @@ public class Client extends Application {
 		for (PaintObject po : allPaintObjects) {
 			((Tile) po).setValue(grid[i%40][i/40]);
 //			System.out.println("("+i%40+","+i/40+") = "+grid[i%40][i/40]);
-			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(255,0,0,Math.min(grid[i%40][i/40]/20.0, 1))));
+			((Tile) po).setColor(ColorTypeConverter.Fx2Awt(Color.rgb(255,0,0,Math.min(grid[i%40][i/40]/(sim.getNumVehicles() / 80.0), 1))));
 			((Tile) po).setSideLength(20);
 			
 			i++;
