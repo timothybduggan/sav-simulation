@@ -13,6 +13,7 @@ import model.Trip;
 import model.TripAssignment;
 import model.TripGeneration;
 import model.Vehicle;
+import model.VehicleRelocation;
 import model.Vehicle_State;
 
 public class test {
@@ -90,8 +91,8 @@ public class test {
 		assertFalse(t.isFinished());
 		assertEquals(t.getWaitTime(), 0, .001);
 		t.update();
-		assertEquals(a.getPreviousPosition().x, 3);
-		assertEquals(a.getPreviousPosition().y, 4);
+//		assertEquals(a.getPreviousPosition().x, 3);
+//		assertEquals(a.getPreviousPosition().y, 4);
 		assertEquals(a.getPosition().x, 7);
 		assertEquals(a.getPosition().y, 1);
 		assertEquals(a.getState(), Vehicle_State.on_trip);
@@ -107,7 +108,6 @@ public class test {
 		assertFalse(t.isFinished());
 		assertEquals(a.getMilesDriven(), 5.50, 0.001);
 		t.update();
-		System.out.println(a.getPosition() + " - " + t.getDestination() + " - " + a.getPosition().equals(t.getDestination()));
 		assertEquals(a.getPosition().x, 10);
 		assertEquals(a.getPosition().y, 10);
 		assertEquals(a.getState(), Vehicle_State.end_trip); // end trip will be in "Vehicle State Enum"
@@ -412,16 +412,106 @@ public class test {
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
 //		System.out.println(a.getState());
-		for (int i = 0; i < 100; i++) {
-			ta.update();
-			map.updateVehicleStates();
-		}
+//		for (int i = 0; i < 100; i++) {
+//			ta.update();
+//			map.updateVehicleStates();
+//		}
 		
 		ta.getWaitListMap();
 		ta.getWaitList();
 		
 	}
 
+	@Test
+	public void VehicleRelocation3Test() {
+		// Initialize
+		ArrayList<Vehicle> cars = new ArrayList<Vehicle>();
+		Vehicle a = new Vehicle(1,1);
+		Vehicle b = new Vehicle(1,1);
+		Vehicle c = new Vehicle(40,40);
+		Vehicle d = new Vehicle(40,40);
+		Vehicle e = new Vehicle(1,1);
+		cars.add(a);
+		cars.add(b);
+		cars.add(c);
+		cars.add(d);
+		cars.add(e);
+		TripGeneration tg = new TripGeneration();
+		Map map = new Map(cars, tg);
+		tg.setMap(map);
+		TripAssignment ta = new TripAssignment(tg, map);
+		VehicleRelocation vr = new VehicleRelocation(ta, tg, map, cars);
+		// Test R3
+		vr.applyR3();
+		map.updateVehicleStates();
+		assertEquals(a.getPreviousPosition(), new Point(1,1));
+		assertEquals(a.getPosition(), new Point(3,1));
+		assertEquals(b.getPreviousPosition(), new Point(1,1));
+		assertEquals(b.getPosition(), new Point(2,2));
+		assertEquals(c.getPreviousPosition(), new Point(40,40));
+		assertEquals(c.getPosition(), new Point(38,40));
+		assertEquals(d.getPreviousPosition(), new Point(40,40));
+		assertEquals(d.getPosition(), new Point(40,40));
+		assertEquals(e.getPreviousPosition(), new Point(1,1));
+		assertEquals(e.getPosition(), new Point(1,1));
+		System.out.println(a.getPosition());
+	}
+	
+	@Test
+	public void VehicleRelocation4Test() {
+		// Initialize
+		ArrayList<Vehicle> cars = new ArrayList<Vehicle>();
+		Vehicle a = new Vehicle(1,1);
+		Vehicle b = new Vehicle(1,1);
+		Vehicle c = new Vehicle(1,1);
+		Vehicle d = new Vehicle(1,1);
+		Vehicle e = new Vehicle(2,1);
+		cars.add(a);
+		cars.add(b);
+		cars.add(c);
+		cars.add(d);
+		cars.add(e);
+		TripGeneration tg = new TripGeneration();
+		Map map = new Map(cars, tg);
+		tg.setMap(map);
+		TripAssignment ta = new TripAssignment(tg, map);
+		VehicleRelocation vr = new VehicleRelocation(ta, tg, map, cars);
+		
+		// Test R4
+		vr.applyR4();
+		map.updateVehicleStates();
+		assertEquals(a.getPosition(), new Point(2,1));
+		assertEquals(b.getPosition(), new Point(1,2));
+		assertEquals(c.getPosition(), new Point(1,1));
+		assertEquals(d.getPosition(), new Point(1,1));
+		assertEquals(e.getPosition(), new Point(2,1));
+		
+		cars.clear();
+		a = new Vehicle(40,40);
+		b = new Vehicle(40,40);
+		c = new Vehicle(40,40);
+		d = new Vehicle(40,40);
+		e = new Vehicle(39,40);
+		cars.add(a);
+		cars.add(b);
+		cars.add(c);
+		cars.add(d);
+		cars.add(e);
+		tg = new TripGeneration();
+		map = new Map(cars, tg);
+		tg.setMap(map);
+		ta = new TripAssignment(tg, map);
+		vr = new VehicleRelocation(ta, tg, map, cars);
+		
+		vr.applyR4();
+		map.updateVehicleStates();
+		assertEquals(a.getPosition(), new Point(39,40));
+		assertEquals(b.getPosition(), new Point(40,39));
+		assertEquals(c.getPosition(), new Point(40,40));
+		assertEquals(d.getPosition(), new Point(40,40));
+		assertEquals(e.getPosition(), new Point(39,40));
+	}
+	
 	private ArrayList<Vehicle> initializeVehicles() {
 		ArrayList<Vehicle> cars = new ArrayList<Vehicle>(1600);
 

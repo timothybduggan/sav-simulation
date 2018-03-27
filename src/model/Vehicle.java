@@ -18,7 +18,7 @@ public class Vehicle {
 	
 	public Vehicle(int row, int col) {
 		position = new Point(row, col);
-		destination = new Point();
+		destination = null;
 		milesDriven = 0;
 		unoccupiedMiles = 0;
 		timeSinceLastStart = 0;
@@ -90,7 +90,8 @@ public class Vehicle {
 	
 	public void update(int timeStep) {
 		this.currentTimeStep = timeStep;
-		this.previousPosition = this.position;
+		this.previousPosition = (Point) this.position.clone();
+		
 		if (this.destination != null) {
 			this.moveTowardsDestination(this.getMaxSpeed());
 		}

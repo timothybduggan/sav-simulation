@@ -51,6 +51,7 @@ public class TripAssignment {
 		checkFutureTrips(); // if any future trips match current time step, we start them now.
 		assignTrips(); // all trips that can be serviced within 5 minutes are assigned a SAV
 		updateTrips();
+		updateTotalDemandMap();
 		currentTimeStep++;
 	}
 	
@@ -138,13 +139,14 @@ public class TripAssignment {
 		return this.waitListMap;
 	}
 	
-	public int[][] getNewDemandMap() {
-		
+	private void updateTotalDemandMap() {
 		for (Trip trip : newTrips) {
 			Point tripPos = trip.getOrigin();
 			demandMap[tripPos.x-1][tripPos.y-1] += 1;
 		}
-		
+	}
+	
+	public int[][] getTotalDemandMap() {
 		return demandMap;
 	}
 	

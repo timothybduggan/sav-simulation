@@ -11,6 +11,7 @@ public class Map {
 	private ArrayList<ArrayList<ArrayList<Vehicle>>> vehicleMap; // each space has a list of what cars are in it.
 	private int[][] numVehicles;
 	private int[][] numFreeVehicles;
+	private int[][] numAvailable;
 	private ArrayList<Vehicle> vehicles;
 	static int width = 40;	// number of east/west blocks
 	static int height = 40;  // number of north/south blocks
@@ -47,6 +48,7 @@ public class Map {
 		
 		this.numVehicles = new int[40][40];
 		this.numFreeVehicles = new int[40][40];
+		this.numAvailable = new int[40][40];
 		
 		countVehicles();
 		countFreeVehicles();
@@ -73,6 +75,19 @@ public class Map {
 		}
 	}
 	
+	private void countAvailableVehicles() {
+		for (int i = 0; i < 40; i++) {
+			for (int j = 0; j < 40; j++) {
+				numFreeVehicles[i][j] = 0;
+				for (Vehicle car : vehicleMap.get(i).get(j)) {
+					if (car.getState() == Vehicle_State.available) {
+						numAvailable[i][j] += 1; 
+					}
+				}
+			}
+		}
+	}
+	
 	public int[][] getNumVehicles() {
 		this.countVehicles();
 		return this.numVehicles;
@@ -81,6 +96,11 @@ public class Map {
 	public int[][] getNumFreeVehicles() {
 		this.countFreeVehicles();
 		return this.numFreeVehicles;
+	}
+	
+	public int[][] getAvailableVehicles() {
+		this.countAvailableVehicles();
+		return this.numAvailable;
 	}
 	
 	public boolean addVehicle(Vehicle car) {
@@ -112,6 +132,13 @@ public class Map {
 		}
 	}
 	
+	public void moveVehicle(Vehicle vehicle, Point dest) {
+		Point pos = vehicle.getPosition();
+		
+		vehicleMap.get(pos.x-1).get(pos.y-1).remove(vehicle);
+		vehicleMap.get(dest.x-1).get(dest.y-1).add(vehicle);
+	}
+	
 	private void resetVehicleMap() {
 		for (ArrayList<ArrayList<Vehicle>> column : vehicleMap) {
 			for (ArrayList<Vehicle> point : column) {
@@ -132,10 +159,12 @@ public class Map {
 					zoneGenerationRates[i][j] = (tripGeneration.getInnerCoreGenerationRate() - tripGeneration.getOuterCoreGenerationRate()) 
 												* (1.0 - (double) distanceFromInnerCore(pos) / maxDistanceFromInnerCore)
 												+ tripGeneration.getOuterCoreGenerationRate();
+//					zoneGenerationRates[i][j] = tripGeneration.getOuterCoreGenerationRate();
 				} else {
 					zoneGenerationRates[i][j] = (tripGeneration.getOuterCoreGenerationRate() - tripGeneration.getOuterServiceGenerationRate())
 												* (1.0 - (double) distanceFromOuterCore(pos) / maxDistanceFromOuterCore)
 												+ tripGeneration.getOuterServiceGenerationRate();
+//					zoneGenerationRates[i][j] = tripGeneration.getOuterServiceGenerationRate();
 				}
 //				System.out.println(zoneGenerationRates[i][j]);
 			}
@@ -243,6 +272,18 @@ public class Map {
 		return vehicleMap.get(pos.x-1).get(pos.y-1);
 	}
 	
+	public int freeVehiclesAt(Point pos) {
+		ArrayList<Vehicle> list = this.getVehicleList(pos);
+		int numFreeVehicles = 0;
+		
+		for (Vehicle vehicle : list) {
+			if (vehicle.getState() != Vehicle_State.on_trip)
+				numFreeVehicles++;
+		}
+		
+		return numFreeVehicles;
+	}
+	
 	private Vehicle getVehicle(Point pos) {
 		for (Vehicle car : this.getVehicleList(pos)) {
 			if (car.getState() == Vehicle_State.available)
@@ -305,6 +346,9 @@ public class Map {
 		
 		for (Vehicle car : vehicles) {
 			if (car.getState() != Vehicle_State.on_trip) {
+				if (car.getState() == Vehicle_State.available) {
+					car.update(0);
+				}
 				car.setState(Vehicle_State.available);
 			}
 		}

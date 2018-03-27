@@ -12,6 +12,8 @@ public class Simulation extends Observable {
 	private VehicleRelocation vehicleRelocation;
 	private Map map;
 	private int timeStep;
+	private boolean inScenario;
+	private int scenarioNumber;
 	
 	public Simulation() {
 		this(true);
@@ -19,18 +21,50 @@ public class Simulation extends Observable {
 	
 	public Simulation(boolean random) {
 		this.timeStep = 0;
-		initializeVehicles(random);
-		initializeTripGeneration();
-		initializeTripAssignment();
-		initializeVehicleRelocation();
+		initializeDefault(random);
+		
 		
 //		printVehicleMap();
 //		printGenerationRates();
 	}
 	
 	public void updateSimulation() {
-		tripAssignment.update();
-		map.updateVehicleStates();
+		// this is one step of the simulation.
+		if (!inScenario) {
+			tripAssignment.update(); // generates trips, assigns vehicles, and moves them.
+			vehicleRelocation.update(); // handles relocation
+			map.updateVehicleStates();
+		} else {
+			if (scenarioNumber == 3) {
+				vehicleRelocation.applyR3();
+			} else if (scenarioNumber == 4) {
+				vehicleRelocation.applyR4();
+			}
+			map.updateVehicleStates();
+		}
+		timeStep++;
+	}
+
+	public int getNumVehicles() {
+		return vehicles.size();
+	}
+	
+	public void initializeScenario(int scenario) {
+		inScenario = true;
+		scenarioNumber = scenario;
+		initializeVehicles(scenario);
+		initializeTripGeneration();
+		initializeTripAssignment();
+		initializeVehicleRelocation();
+		
+	}
+	
+	public void initializeDefault(boolean random) {
+		inScenario = false;
+		initializeVehicles(random);
+		initializeTripGeneration();
+		initializeTripAssignment();
+		initializeVehicleRelocation();
 	}
 	
 	private void initializeVehicles(boolean random) {
@@ -52,6 +86,40 @@ public class Simulation extends Observable {
 		}
 	}
 	
+	private void initializeVehicles(int scenario) {
+		switch(scenario) {
+		
+		case 1:	// R1 Demonstration
+			break;
+		case 2: // R2 Demonstration
+			break;
+		case 3: // R3 Demonstration'
+			vehicles.clear();
+			for (int i = 0; i < 10; i++) {
+				vehicles.add(new Vehicle(10,10));
+			}
+			for (int i = 0; i < 10; i++) {
+				vehicles.add(new Vehicle(30,10));
+			}
+			for (int i = 0; i < 10; i++) {
+				vehicles.add(new Vehicle(10,30));
+			}
+			for (int i = 0; i < 10; i++) {
+				vehicles.add(new Vehicle(30,30));
+			}
+			break;
+		case 4: // R4 Demonstration
+			vehicles.clear();
+			for (int i = 0; i < 25; i++) {
+				vehicles.add(new Vehicle(20,20));
+			}
+			break;
+		default: 
+			break;
+		
+		}
+	}
+	
 	private void initializeTripGeneration() {
 		this.tripGeneration = new TripGeneration();
 		this.map = new Map(this.vehicles, this.tripGeneration);
@@ -59,12 +127,14 @@ public class Simulation extends Observable {
 		this.tripGeneration.setMap(this.map);
 	}
 	
+	
+	
 	private void initializeTripAssignment() {
 		tripAssignment = new TripAssignment(tripGeneration, map);
 	}
 	
 	private void initializeVehicleRelocation() {
-		
+		vehicleRelocation = new VehicleRelocation(tripAssignment, tripGeneration, map, vehicles);
 	}
 	
 	public TripAssignment getTripAssignment() {
@@ -134,37 +204,12 @@ public class Simulation extends Observable {
 		}
 		System.out.println("Total: " + total);
 	}
-	
-	private void update() {
-		// this is one step of the simulation.
-		tripAssignment.update(); // generates trips, assigns vehicles, and moves them.
-		vehicleRelocation.update(); // handles relocation
-		updateVehicleStatus();
-		timeStep++;
-	}
-	
-	private void updateVehicleStatus() {
-		
-		for (Vehicle car : vehicles) {
-			switch(car.getState()) {
-			case available: // these states remain through time steps
-			case on_trip:
-				break;
-			case end_trip:	// these vehicles become available next step
-			case on_relocation:
-				car.setState(Vehicle_State.available);
-				break;
-			default:
-				throw new IllegalArgumentException("Vehicle State not recognized");
-			}
-		}
-	}
-	
+
 	public int[][] getWaitListMap() {
 		return tripAssignment.getWaitListMap();
 	}
 	
 	public int[][] getTotalTripRequests() {
-		return tripAssignment.getNewDemandMap();
+		return tripAssignment.getTotalDemandMap();
 	}
 }
