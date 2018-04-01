@@ -12,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -53,6 +54,7 @@ public class Client extends Application {
 	private Simulation sim;
 	private int[][] grid;
 	private View view = View.VehicleCount;
+	private Menu time = new Menu("null");
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -136,12 +138,14 @@ public class Client extends Application {
 					
 		});
 		
+		
+		
 		views.getItems().addAll(vc, gr, wl, cd);
 		scenarios.getItems().addAll(def, r3, r4);
 		options.getItems().addAll(views, help);
 
 		menuBar = new MenuBar();
-		menuBar.getMenus().addAll(options, scenarios);
+		menuBar.getMenus().addAll(options, scenarios, time);
 	}
 
 	// Initializes the Canvas (for drawing purposes)
@@ -264,8 +268,13 @@ public class Client extends Application {
 		@Override
 		public void handle(ActionEvent event) {
 			updateSimulation();
+			updateTime();
 		}
 	}));
+	
+	private void updateTime() {
+		time.setText(sim.getTime());
+	}
 	
 	private void updateSimulation() {
 		if (!automate) return;

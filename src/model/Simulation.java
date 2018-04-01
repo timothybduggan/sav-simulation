@@ -45,12 +45,27 @@ public class Simulation extends Observable {
 		timeStep++;
 	}
 
+	public String getTime() {
+		String time = "";
+		int day = timeStep / 288;
+		int hour = (timeStep % 288) / 12;
+		int minute = 5 * ((timeStep % 288) % 12);
+		String ampm = "AM";
+		
+		if (hour >= 12) ampm = "PM";
+		if (hour >= 13) hour -= 12;
+		
+		time = String.format("Day: %d\t %02d:%02d %s", day, hour, minute, ampm);
+		return time;
+	}
+	
 	public int getNumVehicles() {
 		return vehicles.size();
 	}
 	
 	public void initializeScenario(int scenario) {
 		inScenario = true;
+		timeStep = 0;
 		scenarioNumber = scenario;
 		initializeVehicles(scenario);
 		initializeTripGeneration();
@@ -60,6 +75,7 @@ public class Simulation extends Observable {
 	}
 	
 	public void initializeDefault(boolean random) {
+		timeStep = 0;
 		inScenario = false;
 		initializeVehicles(random);
 		initializeTripGeneration();
