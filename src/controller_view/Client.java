@@ -137,8 +137,7 @@ public class Client extends Application {
 			updateGridVehicles();
 					
 		});
-		
-		
+
 		
 		views.getItems().addAll(vc, gr, wl, cd);
 		scenarios.getItems().addAll(def, r3, r4);
