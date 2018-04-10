@@ -55,6 +55,7 @@ public class Client extends Application {
 	private int[][] grid;
 	private View view = View.VehicleCount;
 	private Menu time = new Menu("null");
+	private Menu dist = new Menu("null");
 	
 	public static void main(String[] args) {
 		launch(args);
@@ -101,6 +102,7 @@ public class Client extends Application {
 		MenuItem r3 = new MenuItem("R3 Demo");
 		MenuItem r4 = new MenuItem("R4 Demo");
 		Menu options = new Menu("Options");
+		
 		help.setOnAction(event -> {
 			Alert helpWindow = new HelpWindow();
 			helpWindow.showAndWait();
@@ -144,7 +146,7 @@ public class Client extends Application {
 		options.getItems().addAll(views, help);
 
 		menuBar = new MenuBar();
-		menuBar.getMenus().addAll(options, scenarios, time);
+		menuBar.getMenus().addAll(options, scenarios, time, dist);
 	}
 
 	// Initializes the Canvas (for drawing purposes)
@@ -268,11 +270,21 @@ public class Client extends Application {
 		public void handle(ActionEvent event) {
 			updateSimulation();
 			updateTime();
+			updateDistance();
 		}
 	}));
 	
 	private void updateTime() {
-		time.setText(sim.getTime());
+		String time = sim.getTime();
+		if (sim.isPeak()) time += " PEAK. ";
+		else time += " NOT PEAK. ";
+		time += "Avg wait (sec): ";
+		time += String.format("%.2f", sim.getAverageWaitTime() * 60);
+		this.time.setText(time);
+	}
+	
+	private void updateDistance() {
+		dist.setText(String.format("%.2f miles travelled. %.2f %% induced.", sim.getDistance(), sim.getInducedTravel()));
 	}
 	
 	private void updateSimulation() {

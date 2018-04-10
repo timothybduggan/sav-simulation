@@ -58,6 +58,44 @@ public class Simulation extends Observable {
 		time = String.format("Day: %d\t %02d:%02d %s", day, hour, minute, ampm);
 		return time;
 	}
+
+	public double getDistance() {
+		double dist = 0;
+		for (Vehicle car : vehicles) {
+			dist += car.getMilesDriven();
+		}
+		
+		return dist;
+	}
+	
+	public double getAverageDistance() {
+		double dist = this.getDistance();
+		return dist / vehicles.size();
+	}
+	
+	public double getInducedTravel() {
+		double totalDist = this.getDistance();
+		double unoccDist = 0;
+		for (Vehicle car : vehicles) {
+			unoccDist += car.getUnoccupiedMiles();
+		}
+		
+		if (totalDist == 0) return 0;
+		
+		return unoccDist / totalDist * 100;
+	}
+
+	public double getAverageWaitTime() {
+		double totalWait = 0;
+		int totalTrips = tripAssignment.getCompletedTrips().size();
+		if (totalTrips == 0) return 0;
+		
+		for (Trip trip : tripAssignment.getCompletedTrips()) {
+			totalWait += trip.getWaitTime();
+		}
+		
+		return totalWait / totalTrips;
+	}
 	
 	public int getNumVehicles() {
 		return vehicles.size();
@@ -227,5 +265,9 @@ public class Simulation extends Observable {
 	
 	public int[][] getTotalTripRequests() {
 		return tripAssignment.getTotalDemandMap();
+	}
+
+	public boolean isPeak() {
+		return Vehicle.isPeakHours(timeStep);
 	}
 }

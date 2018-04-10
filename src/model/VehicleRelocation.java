@@ -394,6 +394,8 @@ public class VehicleRelocation {
 			if (map.getGenerationRate(point) > maxRate) {
 				maxRate = map.getGenerationRate(point);
 				bestPos = point;
+			} else if (map.getGenerationRate(point) == maxRate) {
+				if (Math.random() < 0.50) bestPos = point;
 			}
 		}
 		
@@ -443,6 +445,8 @@ public class VehicleRelocation {
 			if (map.getGenerationRate(point) > maxRate) {
 				maxRate = map.getGenerationRate(point);
 				bestPos = point;
+			} else if (map.getGenerationRate(point) == maxRate) {
+				if (Math.random() < 0.50) bestPos = point;
 			}
 		}
 		

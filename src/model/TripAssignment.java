@@ -37,6 +37,10 @@ public class TripAssignment {
 		return this.futureTrips;
 	}
 	
+	public ArrayList<Trip> getCompletedTrips() {
+		return this.completed;
+	}
+	
 	public void addFutureTrip(Trip newTrip) {
 		if (newTrip == null) return;
 		

@@ -204,4 +204,13 @@ public class Vehicle {
 		
 		return false;
 	}
+
+	public static boolean isPeakHours(int timeStep) {
+		timeStep %= 288;
+		
+		if (timeStep >= 84  && timeStep < 96 ) return true;
+		if (timeStep >= 192 && timeStep < 222) return true;
+		
+		return false;
+	}
 }
