@@ -265,7 +265,7 @@ public class Client extends Application {
 	/**
 	 * This is used for regularly updating the shown Queue.
 	 */
-	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.5), new EventHandler<ActionEvent>() {
+	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.15), new EventHandler<ActionEvent>() {
 		@Override
 		public void handle(ActionEvent event) {
 			updateSimulation();
@@ -290,7 +290,9 @@ public class Client extends Application {
 	private void updateSimulation() {
 		if (!automate) return;
 		
-		sim.updateSimulation();
+//		for (int i = 0; i < 288; i++) {
+			sim.updateSimulation();
+//		}
 		
 		switch(view) {
 		case VehicleCount:
