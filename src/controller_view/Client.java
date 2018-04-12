@@ -82,8 +82,8 @@ public class Client extends Application {
 		initializeGrid();
 		updateGridVehicles();
 		
-		refresher.setCycleCount(Timeline.INDEFINITE);
-		refresher.play();
+//		refresher.setCycleCount(Timeline.INDEFINITE);
+//		refresher.play();
 		
 		primaryStage.setScene(scene);
 		primaryStage.show();
@@ -265,14 +265,14 @@ public class Client extends Application {
 	/**
 	 * This is used for regularly updating the shown Queue.
 	 */
-	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.15), new EventHandler<ActionEvent>() {
-		@Override
-		public void handle(ActionEvent event) {
-			updateSimulation();
-			updateTime();
-			updateDistance();
-		}
-	}));
+//	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.15), new EventHandler<ActionEvent>() {
+//		@Override
+//		public void handle(ActionEvent event) {
+////			updateSimulation();
+////			updateTime();
+////			updateDistance();
+//		}
+//	}));
 	
 	private void updateTime() {
 		String time = sim.getTime();
@@ -323,7 +323,11 @@ public class Client extends Application {
 		}
 		
 		void handleClick() {
-			automate = !automate;
+//			automate = !automate;
+			automate = true;
+			updateSimulation();
+			updateTime();
+			updateDistance();
 		}
 	}
 }
