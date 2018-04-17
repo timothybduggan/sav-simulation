@@ -248,8 +248,8 @@ public class VehicleRelocation {
 			
 			map.moveVehicle(vehicle, moveTo);
 			vehicle.setDestination(moveTo);
+			vehicle.setState(Vehicle_State.on_relocation_r3);
 			vehicle.update(timeStep);
-			vehicle.setState(Vehicle_State.on_relocation);
 		}
 	}
 	
@@ -308,7 +308,7 @@ public class VehicleRelocation {
 				maxRate = map.getGenerationRate(point);
 				bestPos = point;
 			} else if (map.getGenerationRate(point) == maxRate) {
-				if (Math.random() < 0.50) bestPos = point;
+				//if (Math.random() < 0.50) bestPos = point;
 			}
 		}
 		
@@ -326,8 +326,8 @@ public class VehicleRelocation {
 			
 			map.moveVehicle(vehicle, moveTo);
 			vehicle.setDestination(moveTo);
+			vehicle.setState(Vehicle_State.on_relocation_r4);
 			vehicle.update(0);
-			vehicle.setState(Vehicle_State.on_relocation);
 		}
 	}
 	
@@ -359,7 +359,7 @@ public class VehicleRelocation {
 				maxRate = map.getGenerationRate(point);
 				bestPos = point;
 			} else if (map.getGenerationRate(point) == maxRate) {
-				if (Math.random() < 0.50) bestPos = point;
+				//if (Math.random() < 0.50) bestPos = point;
 			}
 		}
 		
@@ -764,8 +764,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[0]--;
@@ -786,8 +786,8 @@ public class VehicleRelocation {
 				
 				map.moveVehicle(moveMe, moveTo);
 				moveMe.setDestination(moveTo);
+				moveMe.setState(Vehicle_State.on_relocation_r2);
 				moveMe.update(timeStep);
-				moveMe.setState(Vehicle_State.on_relocation);
 				
 				movedVehicles++;
 				vehiclesToMove[0]--;
@@ -808,8 +808,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[0]--;
@@ -831,8 +831,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[0]--;
@@ -854,8 +854,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[2]--;
@@ -877,8 +877,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[2]--;
@@ -900,8 +900,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[2]--;
@@ -923,8 +923,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[2]--;
@@ -946,8 +946,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[1]--;
@@ -969,8 +969,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[1]--;
@@ -992,8 +992,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[1]--;
@@ -1015,8 +1015,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[1]--;
@@ -1038,8 +1038,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[3]--;
@@ -1061,8 +1061,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[3]--;
@@ -1084,8 +1084,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r1);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[3]--;
@@ -1107,8 +1107,8 @@ public class VehicleRelocation {
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
+					moveMe.setState(Vehicle_State.on_relocation_r2);
 					moveMe.update(timeStep);
-					moveMe.setState(Vehicle_State.on_relocation);
 					
 					movedVehicles++;
 					vehiclesToMove[3]--;

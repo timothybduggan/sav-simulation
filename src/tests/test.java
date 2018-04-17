@@ -383,31 +383,31 @@ public class test {
 		assertEquals(ta.getFutureTrips().size(), 1);
 		
 //		System.out.println(a.getState());
-		ta.update(0);
+		ta.updateTest(0);
 		map.updateVehicleStates();
 		assertEquals(ta.getFutureTrips().size(), 1);
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
 //		System.out.println(a.getState());
-		ta.update(1);
+		ta.updateTest(1);
 		map.updateVehicleStates();
 		assertEquals(ta.getFutureTrips().size(), 1);
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
 //		System.out.println(a.getState());
-		ta.update(2);
+		ta.updateTest(2);
 		map.updateVehicleStates();
 		assertEquals(ta.getFutureTrips().size(), 1);
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
 //		System.out.println(a.getState());
-		ta.update(3);
+		ta.updateTest(3);
 		map.updateVehicleStates();
 		assertEquals(ta.getFutureTrips().size(), 0);
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
 //		System.out.println(a.getState());
-		ta.update(4);
+		ta.updateTest(4);
 		map.updateVehicleStates();
 //		System.out.println(ta.getWaitList().size());
 //		System.out.println(a.getPosition());
@@ -446,14 +446,19 @@ public class test {
 		map.updateVehicleStates();
 		assertEquals(a.getPreviousPosition(), new Point(1,1));
 		assertEquals(a.getPosition(), new Point(3,1));
+		assertEquals(a.getMilesR3(), 0.50, .001);
 		assertEquals(b.getPreviousPosition(), new Point(1,1));
 		assertEquals(b.getPosition(), new Point(2,2));
+		assertEquals(a.getMilesR3(), 0.50, .001);
 		assertEquals(c.getPreviousPosition(), new Point(40,40));
+		assertEquals(a.getMilesR3(), 0.50, .001);
 		assertEquals(c.getPosition(), new Point(38,40));
 		assertEquals(d.getPreviousPosition(), new Point(40,40));
 		assertEquals(d.getPosition(), new Point(40,40));
+		assertEquals(d.getMilesR3(), 0, .001);
 		assertEquals(e.getPreviousPosition(), new Point(1,1));
 		assertEquals(e.getPosition(), new Point(1,1));
+		assertEquals(e.getMilesR3(), 0, .001);
 		System.out.println(a.getPosition());
 	}
 	
@@ -481,10 +486,15 @@ public class test {
 		vr.applyR4();
 		map.updateVehicleStates();
 		assertEquals(a.getPosition(), new Point(2,1));
+		assertEquals(a.getMilesR4(), 0.25, 0.001);
 		assertEquals(b.getPosition(), new Point(1,2));
+		assertEquals(b.getMilesR4(), 0.25, 0.001);
 		assertEquals(c.getPosition(), new Point(1,1));
+		assertEquals(c.getMilesR4(), 0, 0.001);
 		assertEquals(d.getPosition(), new Point(1,1));
+		assertEquals(d.getMilesR4(), 0, 0.001);
 		assertEquals(e.getPosition(), new Point(2,1));
+		assertEquals(e.getMilesR4(), 0, 0.001);
 		
 		cars.clear();
 		a = new Vehicle(40,40);
@@ -506,10 +516,15 @@ public class test {
 		vr.applyR4();
 		map.updateVehicleStates();
 		assertEquals(a.getPosition(), new Point(39,40));
+		assertEquals(a.getMilesR4(), 0.25, 0.001);
 		assertEquals(b.getPosition(), new Point(40,39));
+		assertEquals(b.getMilesR4(), 0.25, 0.001);
 		assertEquals(c.getPosition(), new Point(40,40));
+		assertEquals(c.getMilesR4(), 0, 0.001);
 		assertEquals(d.getPosition(), new Point(40,40));
+		assertEquals(d.getMilesR4(), 0, 0.001);
 		assertEquals(e.getPosition(), new Point(39,40));
+		assertEquals(e.getMilesR4(), 0, 0.001);
 	}
 	
 	private ArrayList<Vehicle> initializeVehicles() {

@@ -6,6 +6,10 @@ public class Vehicle {
 	private Point previousPosition; // previous position (where it was last time step)
 	private float milesDriven;	// total miles driven
 	private float unoccupiedMiles;	// miles driven without an occupant
+	private double r1Miles;
+	private double r2Miles;
+	private double r3Miles;
+	private double r4Miles;
 	private int timeSinceLastStart;	// for tracking cold starts (in num ticks)
 	private int coldStarts;	// number of coldstarts for this SAV
 	private int numTrips;	// how many trips has this SAV done so far?
@@ -25,6 +29,10 @@ public class Vehicle {
 		numTrips = 0;
 		timeSinceLastStart = 0;
 		currentState = Vehicle_State.available;
+		r1Miles = 0;
+		r2Miles = 0;
+		r3Miles = 0;
+		r4Miles = 0;
 	}
 	
 	public Vehicle() {
@@ -186,6 +194,21 @@ public class Vehicle {
 			}
 			if (this.currentState != Vehicle_State.on_trip) {
 				unoccupiedMiles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+				switch(this.currentState) {
+				case on_relocation_r1:
+					r1Miles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+					break;
+				case on_relocation_r2:
+					r2Miles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+					break;
+				case on_relocation_r3:
+					r3Miles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+					break;
+				case on_relocation_r4:
+					r4Miles += (this.getMaxSpeed() - remainingShifts) / 4.0;
+				default:
+					break;
+				}
 			}
 			if (this.position.equals(this.destination)) { // when we arrive, remove the destination
 				this.destination = null;
@@ -212,5 +235,21 @@ public class Vehicle {
 		if (timeStep >= 192 && timeStep < 222) return true;
 		
 		return false;
+	}
+	
+	public double getMilesR1() {
+		return this.r1Miles;
+	}
+	
+	public double getMilesR2() {
+		return this.r2Miles;
+	}
+	
+	public double getMilesR3() {
+		return this.r3Miles;
+	}
+	
+	public double getMilesR4() {
+		return this.r4Miles;
 	}
 }

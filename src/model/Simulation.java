@@ -1,7 +1,8 @@
 package model;
-import java.util.Observable;
-import java.util.Random;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Observable;
 
 // The main simulation class. Contains the different modules, and glues them
 // together to run the whole sim. Crazy stuff, huh?
@@ -269,7 +270,7 @@ public class Simulation extends Observable {
 
 	public boolean isPeak() {
 		return Vehicle.isPeakHours(timeStep);
-	}
+	} 
 	
 	public int getNumFutureTrips() {
 		return tripAssignment.getFutureTrips().size();
@@ -277,5 +278,19 @@ public class Simulation extends Observable {
 	
 	public String getFirstFutureTrip() {
 		return tripAssignment.getFutureTrips().get(0).toString();
+	}
+	
+	// Analyzes simulation data and writes to fileName
+	public void analyzeData(String fileName) throws IOException {
+		DataAnalysis dataAnalysis = new DataAnalysis(this, fileName);
+		dataAnalysis.analyze();
+	}
+	
+	public List<Vehicle> getVehicleList() {
+		return this.vehicles;
+	}
+	
+	public List<Trip> getTrips() {
+		return this.tripAssignment.getCompletedTrips();
 	}
 }

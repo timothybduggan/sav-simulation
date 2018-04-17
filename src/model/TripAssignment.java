@@ -59,6 +59,13 @@ public class TripAssignment {
 		updateTotalDemandMap();
 	}
 	
+	public void updateTest(int timeStep) {
+		currentTimeStep = timeStep;
+		checkFutureTrips();
+		assignTrips();
+		updateTotalDemandMap();
+	}
+	
 	private void checkFutureTrips() {
 		ArrayList<Trip> toRemove = new ArrayList<Trip>();
 		
