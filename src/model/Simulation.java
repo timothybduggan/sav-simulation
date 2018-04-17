@@ -31,8 +31,8 @@ public class Simulation extends Observable {
 	public void updateSimulation() {
 		// this is one step of the simulation.
 		if (!inScenario) {
-			tripAssignment.update(); // generates trips, assigns vehicles, and moves them.
-			vehicleRelocation.update(); // handles relocation
+			tripAssignment.update(timeStep); // generates trips, assigns vehicles, and moves them.
+			vehicleRelocation.update(timeStep); // handles relocation
 			map.updateVehicleStates();
 		} else {
 			if (scenarioNumber == 3) {
@@ -269,5 +269,13 @@ public class Simulation extends Observable {
 
 	public boolean isPeak() {
 		return Vehicle.isPeakHours(timeStep);
+	}
+	
+	public int getNumFutureTrips() {
+		return tripAssignment.getFutureTrips().size();
+	}
+	
+	public String getFirstFutureTrip() {
+		return tripAssignment.getFutureTrips().get(0).toString();
 	}
 }

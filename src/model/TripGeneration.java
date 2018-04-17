@@ -52,6 +52,10 @@ public class TripGeneration {
 	}
 	
 	public Trip generateTrip(Point pos) {
+		return this.generateTrip(pos, currentTimeStep);
+	}
+	
+	public Trip generateTrip(Point pos, int timeStep) {
 		Random generator = new Random();
 		Point destination = new Point(-1,-1);
 		
@@ -73,7 +77,7 @@ public class TripGeneration {
 				}
 		}	// This loop keeps us going until we find a valid destination.
 		
-		return new Trip(pos, destination, null, currentTimeStep);
+		return new Trip(pos, destination, null, timeStep);
 	}
 	
 	private int sampleTripDistance() {
@@ -212,19 +216,18 @@ public class TripGeneration {
 		return false;
 	}
 	
-	public ArrayList<Trip> generateTrips() {
+	public ArrayList<Trip> generateTrips(int timeStep) {
 		ArrayList<Trip> newTrips = new ArrayList<Trip>();	// Arraylist of trips generated this call.
 		Random generator = new Random();					// Generator for getting numbers in [0,1)
 		for (int i = 0; i < width; i++) {		// for each zone...
 			for (int j = 0; j < height; j++) {
 				if (generator.nextDouble() < map.getGenerationRate(i,j)) { 	// if we get a number < generation rate for that zone...
-					newTrips.add(this.generateTrip(new Point(i+1,j+1)));	// generate a new trip from that point!
+					newTrips.add(this.generateTrip(new Point(i+1,j+1), timeStep));	// generate a new trip from that point!
 				}
 			}
 		}
 		// return the list of new trips!
 		
-		currentTimeStep++;
 		return newTrips;
 	}
 }

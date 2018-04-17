@@ -293,12 +293,14 @@ public class Client extends Application {
 		
 		if (!automate) return;
 		
-		for (int i = 0; i < 25; i++) {
+		for (int i = 0; i < 10; i++) {
 			System.out.println("Simulating Day " + (i + 1));
 			for (int j = 0; j < 288; j++) {
 				sim.updateSimulation();
 			}
 		}
+		
+		System.out.println("Future Trips Length: " + sim.getNumFutureTrips() + "\t First: " + sim.getFirstFutureTrip());
 		
 		switch(view) {
 		case VehicleCount:
@@ -319,8 +321,6 @@ public class Client extends Application {
 	private boolean automate = false;
 	
 	private class MouseListener implements EventHandler<MouseEvent> {
-		
-		
 		
 		@Override
 		public void handle(MouseEvent event) {

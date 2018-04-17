@@ -10,6 +10,7 @@ public class Trip {
 	private boolean passengerPickedUp;
 	private boolean tripComplete;
 	private boolean hasSAV;
+	private boolean isReturn;
 	
 	public Trip(Point origin, Point destination, Vehicle assignedSAV) {
 		this(origin, destination, assignedSAV, 0);
@@ -29,6 +30,12 @@ public class Trip {
 			this.hasSAV = true;
 		}
 		this.passengerPickedUp = false;
+		this.isReturn = false;
+	}
+	
+	public Trip(Point origin, Point destination, Vehicle assignedSAV, int startTime, boolean isReturn) {
+		this(origin, destination, assignedSAV, startTime);
+		this.isReturn = isReturn;
 	}
 	
 	// returns origin point
@@ -107,5 +114,13 @@ public class Trip {
 		}
 		
 		return null;
+	}
+	
+	public String toString() {
+		return origin.toString() + " -> " + destination.toString();
+	}
+	
+	public boolean isReturnTrip() {
+		return this.isReturn;
 	}
 }

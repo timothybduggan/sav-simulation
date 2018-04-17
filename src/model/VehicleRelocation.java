@@ -351,7 +351,7 @@ public class VehicleRelocation {
 			
 			map.moveVehicle(vehicle, moveTo);
 			vehicle.setDestination(moveTo);
-			vehicle.update(0);
+			vehicle.update(timeStep);
 			vehicle.setState(Vehicle_State.on_relocation);
 		}
 	}
@@ -470,7 +470,8 @@ public class VehicleRelocation {
 		
 	}
 	
-	public void update() {
+	public void update(int timeStep) {
+		this.timeStep = timeStep;
 		applyR1();
 //		applyR2();
 		applyR3();
