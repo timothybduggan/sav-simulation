@@ -290,9 +290,9 @@ public class Client extends Application {
 	private void updateSimulation() {
 		if (!automate) return;
 		
-//		for (int i = 0; i < 288; i++) {
+		for (int i = 0; i < 10; i++) {
 			sim.updateSimulation();
-//		}
+		}
 		
 		switch(view) {
 		case VehicleCount:

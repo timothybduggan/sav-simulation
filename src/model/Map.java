@@ -78,12 +78,13 @@ public class Map {
 	private void countAvailableVehicles() {
 		for (int i = 0; i < 40; i++) {
 			for (int j = 0; j < 40; j++) {
-				numFreeVehicles[i][j] = 0;
+				numAvailable[i][j] = 0;
 				for (Vehicle car : vehicleMap.get(i).get(j)) {
 					if (car.getState() == Vehicle_State.available) {
 						numAvailable[i][j] += 1; 
 					}
 				}
+				
 			}
 		}
 	}
