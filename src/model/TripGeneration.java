@@ -57,7 +57,7 @@ public class TripGeneration {
 		
 		while (!isInServiceArea(destination)) {
 			// Change this to use fig. 1
-			int distance = generator.nextInt(57)+4; // 1. Sample Trip Distance (1-15 miles / 4-60 quarter-miles) [should change based on fig. 1 (data from http://nhts.ornl.gov/2009/pub/stt.pdf)]
+			int distance = sampleTripDistance(); // 1. Sample Trip Distance (1-15 miles / 4-60 quarter-miles) [should change based on fig. 1 (data from http://nhts.ornl.gov/2009/pub/stt.pdf)]
 			int i = 0;
 				while (!isInServiceArea(destination)) {	// 5. If Destination not in service area, return to 2.
 					i++;
@@ -74,6 +74,67 @@ public class TripGeneration {
 		}	// This loop keeps us going until we find a valid destination.
 		
 		return new Trip(pos, destination, null, currentTimeStep);
+	}
+	
+	private int sampleTripDistance() {
+		double random = Math.random();
+		if (random < .036) return 4;
+		else if (random < .0745) return 5;
+		else if (random < .1155) return 6;
+		else if (random < .1585) return 7;
+		else if (random < .2035) return 8;
+		else if (random < .2465) return 9;
+		else if (random < .2875) return 10;
+		else if (random < .3255) return 11;
+		else if (random < .3625) return 12;
+		else if (random < .3965) return 13;
+		else if (random < .4285) return 14;
+		else if (random < .4570) return 15;
+		else if (random < .4845) return 16;
+		else if (random < .5120) return 17;
+		else if (random < .5395) return 18;
+		else if (random < .5670) return 19;
+		else if (random < .5945) return 20;
+		else if (random < .6185) return 21;
+		else if (random < .6405) return 22;
+		else if (random < .6604) return 23;
+		else if (random < .6779) return 24;
+		else if (random < .6944) return 25;
+		else if (random < .7104) return 26;
+		else if (random < .7259) return 27;
+		else if (random < .7409) return 28;
+		else if (random < .7554) return 29;
+		else if (random < .7694) return 30;
+		else if (random < .7829) return 31;
+		else if (random < .7959) return 32;
+		else if (random < .8084) return 33;
+		else if (random < .8204) return 34;
+		else if (random < .8304) return 35;
+		else if (random < .8394) return 36;
+		else if (random < .8486) return 37;
+		else if (random < .8580) return 38;
+		else if (random < .8676) return 39;
+		else if (random < .8774) return 40;
+		else if (random < .8864) return 41;
+		else if (random < .8949) return 42;
+		else if (random < .9031) return 43;
+		else if (random < .9101) return 44;
+		else if (random < .9173) return 45;
+		else if (random < .9247) return 46;
+		else if (random < .9323) return 47;
+		else if (random < .9401) return 48;
+		else if (random < .9470) return 49;
+		else if (random < .9525) return 50;
+		else if (random < .9590) return 51;
+		else if (random < .9639) return 52;
+		else if (random < .9687) return 53;
+		else if (random < .97345) return 54;
+		else if (random < .97795) return 55;
+		else if (random < .98195) return 56;
+		else if (random < .98695) return 57;
+		else if (random < .99295) return 58;
+		else if (random < .9995) return 59;
+		else  return 60;
 	}
 	
 	private double probabilityEast(Point pos) {
