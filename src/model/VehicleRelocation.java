@@ -485,6 +485,7 @@ public class VehicleRelocation {
 		do {
 			iteration++;
 			Point maxBlock = findMaxBlock(balances);
+			while (serviced[maxBlock.x][maxBlock.y]) maxBlock = findMaxBlock(balances, serviced);
 			balanceBlockR1(maxBlock, balances);
 			balances = calculateBlocksR1();
 			serviced[maxBlock.x][maxBlock.y] = true;
@@ -500,12 +501,12 @@ public class VehicleRelocation {
 			for (int j = 0; j < 5; j++) {
 				blocks[i][j] = totalFreeVehicles * (((double) vehiclesInBlockR1(i,j) / (double) totalFreeVehicles)
 											        - (demandInBlockR1(i,j) / totalDemand));
-				System.out.print(blocks[i][j] + "\t");
+				//System.out.print(blocks[i][j] + "\t");
 			}
-			System.out.println();
+			//System.out.println();
 		}
 		
-		System.out.println("~~~~~~~~~~~~~~~~~~~~");
+		//System.out.println("~~~~~~~~~~~~~~~~~~~~");
 		return blocks;
 	}
 	
@@ -531,6 +532,24 @@ public class VehicleRelocation {
 		return retPoint;
 	}
 
+	private Point findMaxBlock(double[][] blockBalances, boolean[][] serviced) {
+		double maxVal = 0;
+		Point retPoint = new Point(-1,-1);
+		for (int i = 0; i < blockBalances.length; i++) {
+			for (int j = 0; j < blockBalances[i].length; j++) {
+				if (Math.abs(blockBalances[i][j]) > maxVal) {
+					if (serviced[i][j]) continue;
+					else {
+						maxVal = Math.abs(blockBalances[i][j]);
+						retPoint.x = i; 
+						retPoint.y = j;
+					}
+				}
+			}
+		}
+		return retPoint;
+	}
+	
 	private void balanceBlockR1(Point block, double[][] balances) {
 		boolean[] hasDirection = checkDirectionsR1(block); // 0 - north, 1 - east, 2 - south, 3 - west;
 		int[] freeVehiclesInBlock = calculateAvailableVehiclesR1(block, hasDirection);
@@ -667,8 +686,8 @@ public class VehicleRelocation {
 		for (int i = 0; i < 8 && vehiclesToMove[0] > 0; i++) {
 			if (freeVehicles[8 * block.x + i][8 * (block.y + 1) - 1 - radius] >= 1) {
 				while (freeVehicles[8 * block.x + i][8 * (block.y + 1) - 1 - radius] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * block.x + i + 1, 8 * (block.y + 1) - 1 - radius + 1));
-					Point moveTo = new Point(8 * block.x + i + 1, 8 * (block.y + 1) - 1 + 1);
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * block.x + i + 1, 8 * (block.y + 1) - 1 - radius + 1));
+					Point moveTo = new Point(8 * block.x + i + 1, 8 * (block.y + 1) + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
 					moveMe.setDestination(moveTo);
@@ -690,7 +709,7 @@ public class VehicleRelocation {
 		for (int i = 0; i < 8 && vehiclesToMove[0] > 0; i++) {
 			if (freeVehicles[8 * block.x + i][8 * (block.y + 1) + radius] >= 1) {
 				while (freeVehicles[8 * block.x + i][8 * (block.y + 1) + radius] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * block.x + i + 1, 8 * (block.y + 1) + radius + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * block.x + i + 1, 8 * (block.y + 1) + radius + 1));
 					Point moveTo = new Point(8 * block.x + i + 1, 8 * (block.y + 1) - 1 + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -713,7 +732,7 @@ public class VehicleRelocation {
 		for (int i = 7; i >= 0 && vehiclesToMove[2] > 0; i--) {
 			if (freeVehicles[8 * block.x + i][8 * block.y + radius] >= 1) {
 				while (freeVehicles[8 * block.x + i][8 * block.y + radius] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * block.x + i + 1, 8 * block.y + radius + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * block.x + i + 1, 8 * block.y + radius + 1));
 					Point moveTo = new Point(8 * block.x + i + 1, 8 * block.y - 1 + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -736,7 +755,7 @@ public class VehicleRelocation {
 		for (int i = 7; i >= 0 && vehiclesToMove[2] > 0; i--) {
 			if (freeVehicles[8 * block.x + i][8 * block.y - 1 - radius] >= 1) {
 				while (freeVehicles[8 * block.x + i][8 * block.y - 1 - radius] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * block.x + i + 1, 8 * block.y - 1 - radius + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * block.x + i + 1, 8 * block.y - 1 - radius + 1));
 					Point moveTo = new Point(8 * block.x + i + 1, 8 * block.y + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -759,7 +778,7 @@ public class VehicleRelocation {
 		for (int i = 7; i >= 0 && vehiclesToMove[1] > 0; i--) {
 			if (freeVehicles[8 * (block.x + 1) - 1 - radius][8 * block.y + i] >= 1) {
 				while (freeVehicles[8 * (block.x + 1) - 1 - radius][8 * block.y + i] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * (block.x + 1) - 1 - radius + 1, 8 * block.y + i + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * (block.x + 1) - 1 - radius + 1, 8 * block.y + i + 1));
 					Point moveTo = new Point(8 * (block.x + 1) + 1, 8 * block.y + i + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -782,7 +801,7 @@ public class VehicleRelocation {
 		for (int i = 7; i >= 0 && vehiclesToMove[1] > 0; i--) {
 			if (freeVehicles[8 * (block.x + 1) + radius][8 * block.y + i] >= 1) {
 				while (freeVehicles[8 * (block.x + 1) + radius][8 * block.y + i] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * (block.x + 1) + radius + 1, 8 * block.y + i + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * (block.x + 1) + radius + 1, 8 * block.y + i + 1));
 					Point moveTo = new Point(8 * (block.x + 1) - 1 + 1, 8 * block.y + i + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -805,7 +824,7 @@ public class VehicleRelocation {
 		for (int i = 0; i < 8 && vehiclesToMove[3] > 0; i++) {
 			if (freeVehicles[8 * block.x + radius][8 * block.y + i] >= 1) {
 				while (freeVehicles[8 * block.x + radius][8 * block.y + i] >= 1) {
-					Vehicle moveMe = map.findFreeVehicle(new Point(8 * block.x + radius + 1, 8 * block.y + i + 1));
+					Vehicle moveMe = map.getFreeVehicleAt(new Point(8 * block.x + radius + 1, 8 * block.y + i + 1));
 					Point moveTo = new Point(8 * block.x - 1 + 1, 8 * block.y + i + 1);
 					
 					map.moveVehicle(moveMe, moveTo);
@@ -849,16 +868,16 @@ public class VehicleRelocation {
 		double[] adjacentBalances = findAdjacentBalances(block, hasDirection, balances);
 		int[] vehiclesToDirection = new int[4];
 		int vehiclesRemaining = availableVehicles[4];
-		double minDifference = 0;
+		double maxDifference = 0;
 		int totalFreeVehicles = countFreeVehicles();
 		do {
 			int minDirection = findMinDirection(hasDirection, adjacentBalances);
 			vehiclesToDirection[minDirection]++;
 			adjacentBalances[minDirection]++;
 			adjacentBalances[4]--;
-			minDifference = calculateMinDifference(hasDirection, adjacentBalances);
+			maxDifference = calculateMaxDifference(hasDirection, adjacentBalances);
 			vehiclesRemaining--;
-		} while (minDifference >= 2 && vehiclesRemaining > 0 && (adjacentBalances[4] >= totalFreeVehicles * 0.1));
+		} while (maxDifference >= 2 && vehiclesRemaining > 0 && (adjacentBalances[4] >= totalFreeVehicles * 0.01));
 		
 		return vehiclesToDirection;
 	}
@@ -870,16 +889,16 @@ public class VehicleRelocation {
 		for (int i = 0; i < 4; i++) {
 			if (hasDirection[i]) vehiclesRemaining += availableVehicles[i];
 		}
-		double minDifference = 0;
+		double maxDifference = 0;
 		int totalFreeVehicles = countFreeVehicles();
 		do {
 			int maxDirection = findMaxDirection(hasDirection, adjacentBalances);
 			vehiclesFromDirection[maxDirection]++;
 			adjacentBalances[maxDirection]--;
 			adjacentBalances[4]++;
-			minDifference = calculateMinDifference(hasDirection, adjacentBalances);
+			maxDifference = calculateMaxDifference(hasDirection, adjacentBalances);
 			vehiclesRemaining--;
-		} while (minDifference >= 2 && vehiclesRemaining > 0 && (adjacentBalances[4] <= totalFreeVehicles * (-0.1)));
+		} while (maxDifference >= 2 && vehiclesRemaining > 0 && (adjacentBalances[4] <= totalFreeVehicles * (-0.01)));
 		
 		return vehiclesFromDirection;
 	}
@@ -929,18 +948,18 @@ public class VehicleRelocation {
 		return maxDirection;
 	}
 	
-	private double calculateMinDifference(boolean[] hasDirection, double[] adjBalances) {
-		double minDifference = -1;
-		for (int i = 0; i < hasDirection.length-1; i++) {
+	private double calculateMaxDifference(boolean[] hasDirection, double[] adjBalances) {
+		double maxDifference = -1;
+		for (int i = 0; i < hasDirection.length; i++) {
 			if (!hasDirection[i]) continue;
-			if (minDifference == -1) {
-				minDifference = adjBalances[4] - adjBalances[i];
-			} else if (adjBalances[4]-adjBalances[i] < minDifference) {
-				minDifference = adjBalances[4] - adjBalances[i];
+			if (maxDifference == -1) {
+				maxDifference = Math.abs(adjBalances[4] - adjBalances[i]);
+			} else if (Math.abs(adjBalances[4] - adjBalances[i]) > maxDifference) {
+				maxDifference = Math.abs(adjBalances[4] - adjBalances[i]);
 			}
 		}
 		
-		return minDifference;
+		return maxDifference;
 	}
 	
 	private boolean isCompleteR1(double[][] balances, boolean[][] serviced) {

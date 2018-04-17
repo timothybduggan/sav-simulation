@@ -82,6 +82,8 @@ public class Client extends Application {
 		initializeGrid();
 		updateGridVehicles();
 		
+		
+		// TODO: For finding the Automation Timer
 //		refresher.setCycleCount(Timeline.INDEFINITE);
 //		refresher.play();
 		
@@ -265,14 +267,14 @@ public class Client extends Application {
 	/**
 	 * This is used for regularly updating the shown Queue.
 	 */
-//	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.15), new EventHandler<ActionEvent>() {
-//		@Override
-//		public void handle(ActionEvent event) {
-////			updateSimulation();
-////			updateTime();
-////			updateDistance();
-//		}
-//	}));
+	private Timeline refresher = new Timeline(new KeyFrame(Duration.seconds(.50), new EventHandler<ActionEvent>() {
+		@Override
+		public void handle(ActionEvent event) {
+			updateSimulation();
+			updateTime();
+			updateDistance();
+		}
+	}));
 	
 	private void updateTime() {
 		String time = sim.getTime();
@@ -288,10 +290,14 @@ public class Client extends Application {
 	}
 	
 	private void updateSimulation() {
+		
 		if (!automate) return;
 		
-		for (int i = 0; i < 10; i++) {
-			sim.updateSimulation();
+		for (int i = 0; i < 25; i++) {
+			System.out.println("Simulating Day " + (i + 1));
+			for (int j = 0; j < 288; j++) {
+				sim.updateSimulation();
+			}
 		}
 		
 		switch(view) {
@@ -323,8 +329,8 @@ public class Client extends Application {
 		}
 		
 		void handleClick() {
-//			automate = !automate;
-			automate = true;
+			automate = !automate;
+//			automate = true;
 			updateSimulation();
 			updateTime();
 			updateDistance();

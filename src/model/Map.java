@@ -342,6 +342,14 @@ public class Map {
 			
 	}
 	
+	public Vehicle getFreeVehicleAt(Point origin) {
+		for (Vehicle car : vehicleMap.get(origin.x-1).get(origin.y-1)) {
+			if (car.getState() == Vehicle_State.available)
+				return car;
+		}
+		return null;
+	}
+	
 	public void updateVehicleStates() {
 		this.updateVehicles();
 		
