@@ -372,7 +372,7 @@ public class VehicleRelocation {
 		applyR1();
 		applyR2();
 		applyR3();
-		applyR4();
+//		applyR4();
 	}
 
 	private void applyR1() {

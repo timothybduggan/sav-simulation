@@ -23,16 +23,18 @@ public class DataAnalysis {
 		writeOut(waitTimes, inducedTravel);
 	}
 	
-	// returns 2 double array, first is average wait time, second is standard deviation (in seconds)
+	// returns 3 double array, first is average wait time, second is standard deviation (in seconds), 3rd is number of 'unserviced' trips
 	private double[] analyzeWaitTimes() {
 		List<Trip> trips = sim.getTrips();
 		double totalWaitTime = 0;
 		double meanWaitTime = 0;
 		double sumVariance = 0;
 		double standardDeviation = 0;
+		double unserviced = 0;
 		
 		for (Trip trip : trips) {
 			totalWaitTime += trip.getWaitTime();
+			if (trip.getWaitTime() >= 30) unserviced++;
 		}
 		
 		meanWaitTime = totalWaitTime / trips.size();
@@ -43,7 +45,7 @@ public class DataAnalysis {
 		
 		standardDeviation = Math.sqrt(sumVariance / trips.size());
 		
-		double[] retVal = {meanWaitTime, standardDeviation};
+		double[] retVal = {meanWaitTime * 60, standardDeviation * 60, unserviced};
 		
 		return retVal;
 	}
@@ -61,11 +63,11 @@ public class DataAnalysis {
 			milesR4 += car.getMilesR4();
 		}
 		
-		inducedTravel[0] = (milesR1 + milesR2 + milesR3 + milesR4) / (totalMiles) * 100;
-		inducedTravel[1] = (milesR1) / (totalMiles) * 100;
-		inducedTravel[2] = (milesR2) / (totalMiles) * 100;
-		inducedTravel[3] = (milesR3) / (totalMiles) * 100;
-		inducedTravel[4] = (milesR4) / (totalMiles) * 100;
+		inducedTravel[0] = (milesR1 + milesR2 + milesR3 + milesR4) / (totalMiles);
+		inducedTravel[1] = (milesR1) / (totalMiles);
+		inducedTravel[2] = (milesR2) / (totalMiles);
+		inducedTravel[3] = (milesR3) / (totalMiles);
+		inducedTravel[4] = (milesR4) / (totalMiles);
 		
 		return inducedTravel;
 	}
@@ -75,6 +77,7 @@ public class DataAnalysis {
 		
 		out.write("Mean Wait Time: " + waitTimes[0] + "\n");
 		out.write("Standard Dev : " + waitTimes[1] + "\n");
+		out.write("Unserved Trips: " + waitTimes[2] + "\n");
 		out.write("Total Induced Travel : " + inducedTravel[0] + "\n");
 		out.write("R1 Induced Travel : " + inducedTravel[1] + "\n");
 		out.write("R2 Induced Travel : " + inducedTravel[2] + "\n");
